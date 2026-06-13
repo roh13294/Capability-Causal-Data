@@ -1,0 +1,166 @@
+{
+  "metrics": [
+    {
+      "component": "mean_margin_collapse_only",
+      "correct_count": 81,
+      "failure_auroc": 0.6058879392212726,
+      "failure_count": 39,
+      "id_accuracy": 0.9666666666666667,
+      "shifted_accuracy": 0.675,
+      "task": "synthetic"
+    },
+    {
+      "component": "tail_margin_collapse_only",
+      "correct_count": 81,
+      "failure_auroc": 0.6011396011396012,
+      "failure_count": 39,
+      "id_accuracy": 0.9666666666666667,
+      "shifted_accuracy": 0.675,
+      "task": "synthetic"
+    },
+    {
+      "component": "js_only",
+      "correct_count": 81,
+      "failure_auroc": 0.6445077556188668,
+      "failure_count": 39,
+      "id_accuracy": 0.9666666666666667,
+      "shifted_accuracy": 0.675,
+      "task": "synthetic"
+    },
+    {
+      "component": "label_flip_only",
+      "correct_count": 81,
+      "failure_auroc": 0.886039886039886,
+      "failure_count": 39,
+      "id_accuracy": 0.9666666666666667,
+      "shifted_accuracy": 0.675,
+      "task": "synthetic"
+    },
+    {
+      "component": "margin_plus_js",
+      "correct_count": 81,
+      "failure_auroc": 0.6027223805001583,
+      "failure_count": 39,
+      "id_accuracy": 0.9666666666666667,
+      "shifted_accuracy": 0.675,
+      "task": "synthetic"
+    },
+    {
+      "component": "full_shift_risk",
+      "correct_count": 81,
+      "failure_auroc": 0.798670465337132,
+      "failure_count": 39,
+      "id_accuracy": 0.9666666666666667,
+      "shifted_accuracy": 0.675,
+      "task": "synthetic"
+    },
+    {
+      "component": "mean_margin_collapse_only",
+      "correct_count": 34,
+      "failure_auroc": 0.39514066496163686,
+      "failure_count": 46,
+      "id_accuracy": 1.0,
+      "shifted_accuracy": 0.425,
+      "task": "vision"
+    },
+    {
+      "component": "tail_margin_collapse_only",
+      "correct_count": 34,
+      "failure_auroc": 0.39705882352941174,
+      "failure_count": 46,
+      "id_accuracy": 1.0,
+      "shifted_accuracy": 0.425,
+      "task": "vision"
+    },
+    {
+      "component": "js_only",
+      "correct_count": 34,
+      "failure_auroc": 0.4251918158567775,
+      "failure_count": 46,
+      "id_accuracy": 1.0,
+      "shifted_accuracy": 0.425,
+      "task": "vision"
+    },
+    {
+      "component": "label_flip_only",
+      "correct_count": 34,
+      "failure_auroc": 0.5095907928388747,
+      "failure_count": 46,
+      "id_accuracy": 1.0,
+      "shifted_accuracy": 0.425,
+      "task": "vision"
+    },
+    {
+      "component": "margin_plus_js",
+      "correct_count": 34,
+      "failure_auroc": 0.39641943734015345,
+      "failure_count": 46,
+      "id_accuracy": 1.0,
+      "shifted_accuracy": 0.425,
+      "task": "vision"
+    },
+    {
+      "component": "full_shift_risk",
+      "correct_count": 34,
+      "failure_auroc": 0.4629156010230179,
+      "failure_count": 46,
+      "id_accuracy": 1.0,
+      "shifted_accuracy": 0.425,
+      "task": "vision"
+    },
+    {
+      "component": "mean_margin_collapse_only",
+      "correct_count": 52,
+      "failure_auroc": 0.614010989010989,
+      "failure_count": 28,
+      "id_accuracy": 0.825,
+      "shifted_accuracy": 0.65,
+      "task": "text"
+    },
+    {
+      "component": "tail_margin_collapse_only",
+      "correct_count": 52,
+      "failure_auroc": 0.6092032967032966,
+      "failure_count": 28,
+      "id_accuracy": 0.825,
+      "shifted_accuracy": 0.65,
+      "task": "text"
+    },
+    {
+      "component": "js_only",
+      "correct_count": 52,
+      "failure_auroc": 0.6668956043956044,
+      "failure_count": 28,
+      "id_accuracy": 0.825,
+      "shifted_accuracy": 0.65,
+      "task": "text"
+    },
+    {
+      "component": "label_flip_only",
+      "correct_count": 52,
+      "failure_auroc": 0.7479395604395604,
+      "failure_count": 28,
+      "id_accuracy": 0.825,
+      "shifted_accuracy": 0.65,
+      "task": "text"
+    },
+    {
+      "component": "margin_plus_js",
+      "correct_count": 52,
+      "failure_auroc": 0.6346153846153846,
+      "failure_count": 28,
+      "id_accuracy": 0.825,
+      "shifted_accuracy": 0.65,
+      "task": "text"
+    },
+    {
+      "component": "full_shift_risk",
+      "correct_count": 52,
+      "failure_auroc": 0.5989010989010989,
+      "failure_count": 28,
+      "id_accuracy": 0.825,
+      "shifted_accuracy": 0.65,
+      "task": "text"
+    }
+  ]
+}

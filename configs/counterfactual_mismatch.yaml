@@ -1,0 +1,16 @@
+seed: 41
+prefer_gpu: true
+results_dir: results
+epochs: 4
+batch_size: 64
+lr: 0.002
+n_counterfactuals: 4
+intervention_types: [color, background, texture]
+shift_types: [color, background, texture]
+data:
+  n_train: 384
+  n_test: 192
+  train_corr: 0.95
+  id_corr: 0.95
+  shift_corr: 0.10
+  image_size: 16

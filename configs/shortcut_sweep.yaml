@@ -1,0 +1,13 @@
+seed: 21
+prefer_gpu: true
+results_dir: results
+epochs: 6
+batch_size: 64
+lr: 0.003
+n_counterfactuals: 4
+shortcut_correlations: [0.60, 0.70, 0.80, 0.90, 0.95, 0.99]
+data:
+  n_train: 512
+  n_test: 256
+  shift_corr: 0.10
+  noise: 0.35

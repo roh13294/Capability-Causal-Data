@@ -1,0 +1,1 @@
+CIC is most useful in the confident-wrong shortcut regime, not in every distribution-shift setting. The figure contrasts confidence-solvable, confident-wrong, and mixed regimes; confidence remains strong for ordinary uncertainty, while Counterfactual Instability Certificates target high-confidence shortcut failures. Error bars show across-seed standard deviation where available.

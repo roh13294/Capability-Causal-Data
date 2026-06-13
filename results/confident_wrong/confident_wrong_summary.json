@@ -1,0 +1,43 @@
+{
+  "metrics": [
+    {
+      "failed_conf_ge_0.8": 0.1958762886597938,
+      "failed_conf_ge_0.9": 0.041237113402061855,
+      "failure_rate": 0.8083333333333333,
+      "id_accuracy": 0.9833333333333333,
+      "mean_confidence_correct": 0.5953105688095093,
+      "mean_confidence_failed": 0.7010483741760254,
+      "n_correct": 23,
+      "n_failures": 97,
+      "n_shifted": 120,
+      "shifted_accuracy": 0.19166666666666668,
+      "task": "synthetic"
+    },
+    {
+      "failed_conf_ge_0.8": 0.5375,
+      "failed_conf_ge_0.9": 0.0,
+      "failure_rate": 1.0,
+      "id_accuracy": 0.975,
+      "mean_confidence_correct": null,
+      "mean_confidence_failed": 0.8386871218681335,
+      "n_correct": 0,
+      "n_failures": 80,
+      "n_shifted": 80,
+      "shifted_accuracy": 0.0,
+      "task": "vision"
+    },
+    {
+      "failed_conf_ge_0.8": 0.77,
+      "failed_conf_ge_0.9": 0.77,
+      "failure_rate": 1.0,
+      "id_accuracy": 0.94,
+      "mean_confidence_correct": null,
+      "mean_confidence_failed": 0.9202072620391846,
+      "n_correct": 0,
+      "n_failures": 100,
+      "n_shifted": 100,
+      "shifted_accuracy": 0.0,
+      "task": "text"
+    }
+  ]
+}

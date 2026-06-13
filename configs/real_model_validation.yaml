@@ -1,0 +1,23 @@
+seed: 29
+prefer_gpu: false
+results_dir: results
+data:
+  n_per_class: 16
+  image_size: 64
+  shortcut_type: background
+  classes:
+    - circle
+    - square
+    - triangle
+    - star
+    - cross
+model:
+  mode: auto
+  fallback_on_clip_unavailable: true
+  allow_weight_download: false
+  allow_untrained_torchvision: false
+  probe_epochs: 3
+  probe_lr: 0.01
+  fallback_epochs: 14
+  fallback_lr: 0.01
+  batch_size: 32

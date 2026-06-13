@@ -1,0 +1,12 @@
+{
+  "best_cic_minus_confidence": 0.7526506899055919,
+  "best_shift_risk_minus_confidence": null,
+  "n_rows": 11,
+  "tasks": [
+    "clip_overlay_validation",
+    "real_model_validation",
+    "synthetic",
+    "text",
+    "vision"
+  ]
+}

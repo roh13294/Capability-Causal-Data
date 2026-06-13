@@ -1,0 +1,18 @@
+seed: 62
+prefer_gpu: false
+results_dir: results
+epochs: 6
+batch_size: 64
+lr: 0.002
+n_counterfactuals: 4
+data:
+  n_train: 320
+  n_test: 160
+  train_corr: 0.98
+  id_corr: 0.98
+  shift_corr: 0.98
+  shift_mode: partial_in_support_flip
+  partial_flip_fraction: 0.6
+  partial_flip_strength: 1.0
+  image_size: 16
+  shortcut_type: color

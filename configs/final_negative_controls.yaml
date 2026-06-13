@@ -1,0 +1,12 @@
+results_dir: results
+seeds: [0, 1, 2]
+n_examples: 96
+controls:
+  - true_counterfactual
+  - no_shortcut_correlation
+  - random_labels
+  - irrelevant_counterfactuals
+  - shuffled_any
+  - within_class_shuffled
+  - same_shortcut_shuffled
+  - matched_confidence_shuffled

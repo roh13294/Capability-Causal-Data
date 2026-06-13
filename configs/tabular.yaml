@@ -1,0 +1,15 @@
+seed: 4
+prefer_gpu: true
+results_dir: results
+epochs: 5
+batch_size: 64
+lr: 0.003
+n_counterfactuals: 4
+stability_lambda: 0.5
+stability_mode: combined
+data:
+  n_train: 512
+  n_test: 256
+  train_corr: 0.95
+  id_corr: 0.95
+  shift_corr: 0.10

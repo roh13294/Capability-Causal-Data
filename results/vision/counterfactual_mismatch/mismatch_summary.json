@@ -1,0 +1,51 @@
+{
+  "best_cells_by_auroc": [
+    {
+      "bottom_risk_failure_rate": 0.0,
+      "certificate_intervention_type": "color",
+      "deployment_shift_type": "texture",
+      "failure_auroc": 0.9988064236111112,
+      "risk_ratio": 100000000.0,
+      "shifted_accuracy": 0.5,
+      "top_risk_failure_rate": 1.0
+    },
+    {
+      "bottom_risk_failure_rate": 0.42105263157894735,
+      "certificate_intervention_type": "texture",
+      "deployment_shift_type": "background",
+      "failure_auroc": 0.6875,
+      "risk_ratio": 1.75,
+      "shifted_accuracy": 0.08333333333333333,
+      "top_risk_failure_rate": 0.7368421052631579
+    },
+    {
+      "bottom_risk_failure_rate": 0.3157894736842105,
+      "certificate_intervention_type": "color",
+      "deployment_shift_type": "color",
+      "failure_auroc": 0.6058657062001543,
+      "risk_ratio": 1.6666666666666667,
+      "shifted_accuracy": 0.11979166666666667,
+      "top_risk_failure_rate": 0.5263157894736842
+    },
+    {
+      "bottom_risk_failure_rate": 0.5263157894736842,
+      "certificate_intervention_type": "texture",
+      "deployment_shift_type": "color",
+      "failure_auroc": 0.5690764085412915,
+      "risk_ratio": 1.0,
+      "shifted_accuracy": 0.11979166666666667,
+      "top_risk_failure_rate": 0.5263157894736842
+    },
+    {
+      "bottom_risk_failure_rate": 0.5789473684210527,
+      "certificate_intervention_type": "background",
+      "deployment_shift_type": "color",
+      "failure_auroc": 0.3745819397993311,
+      "risk_ratio": 0.4545454545454545,
+      "shifted_accuracy": 0.11979166666666667,
+      "top_risk_failure_rate": 0.2631578947368421
+    }
+  ],
+  "mean_diagonal_auroc": 0.4465594809808595,
+  "mean_failure_auroc": 0.47618826125088315
+}

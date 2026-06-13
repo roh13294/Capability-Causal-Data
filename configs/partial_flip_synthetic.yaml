@@ -1,0 +1,19 @@
+seed: 61
+prefer_gpu: false
+results_dir: results
+epochs: 8
+batch_size: 64
+lr: 0.003
+n_counterfactuals: 4
+data:
+  n_train: 512
+  n_test: 256
+  train_corr: 0.98
+  id_corr: 0.98
+  shift_corr: 0.98
+  shift_mode: partial_in_support_flip
+  partial_flip_fraction: 0.6
+  partial_flip_strength: 1.0
+  noise: 0.30
+  causal_strength: 1.0
+  shortcut_strength: 1.3

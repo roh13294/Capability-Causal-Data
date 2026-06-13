@@ -1,0 +1,20 @@
+{
+  "best_method_by_mean_auroc": {
+    "ShiftRisk": 0.6923384526224456,
+    "causal reliability": 0.6923384526224456,
+    "confidence": 0.8931056334645727,
+    "entropy": 0.8931056334645727,
+    "margin": 0.8931056334645727
+  },
+  "mean_shift_risk_auroc": 0.6923384526224456,
+  "mean_shift_risk_ratio": 5333333.333333333,
+  "mean_shifted_accuracy": 0.90234375,
+  "shortcut_correlations": [
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    0.95,
+    0.99
+  ]
+}

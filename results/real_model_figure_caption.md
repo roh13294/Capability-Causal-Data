@@ -1,0 +1,1 @@
+Real-model validation on a controlled shortcut task. This figure compares confidence-risk and CIC failure AUROC and shows the reliability plane for shifted shortcut examples. It is supporting evidence, not proof of foundation-model generalization.

@@ -1,0 +1,6 @@
+results_dir: results
+seeds: [0, 1, 2]
+tasks: [synthetic, vision, text]
+regimes: [confidence_solvable, confident_wrong, mixed]
+n_examples: 96
+protocol: locked_quick

@@ -1,0 +1,9 @@
+results_dir: results
+seed: 0
+synthetic:
+  n_examples: 512
+  n_features: 8
+  causal_dims: [0, 1]
+  shortcut_dims: [2]
+  shortcut_strength: 1.6
+  l2: 0.001

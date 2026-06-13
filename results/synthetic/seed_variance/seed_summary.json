@@ -1,0 +1,40 @@
+[
+  {
+    "('confidence_auroc', 'mean')": 0.8540300363361937,
+    "('confidence_auroc', 'std')": 0.06453834582321907,
+    "('entropy_auroc', 'mean')": 0.8540300363361937,
+    "('entropy_auroc', 'std')": 0.06453834582321907,
+    "('high_conf_low_reliability_failure_rate', 'mean')": 0.016079734219269105,
+    "('high_conf_low_reliability_failure_rate', 'std')": 0.03747440236678549,
+    "('id_accuracy', 'mean')": 0.99375,
+    "('id_accuracy', 'std')": 0.007411588266019624,
+    "('margin_auroc', 'mean')": 0.8540300363361937,
+    "('margin_auroc', 'std')": 0.06453834582321907,
+    "('model', '')": "erm",
+    "('seed', 'mean')": 4.5,
+    "('seed', 'std')": 3.0276503540974917,
+    "('shift_risk_auroc', 'mean')": 0.7067850526889334,
+    "('shift_risk_auroc', 'std')": 0.06496694368380786,
+    "('shifted_accuracy', 'mean')": 0.89609375,
+    "('shifted_accuracy', 'std')": 0.07120384104222656
+  },
+  {
+    "('confidence_auroc', 'mean')": 0.9982638888888888,
+    "('confidence_auroc', 'std')": 0.0034722222222221947,
+    "('entropy_auroc', 'mean')": 0.9982638888888888,
+    "('entropy_auroc', 'std')": 0.0034722222222221947,
+    "('high_conf_low_reliability_failure_rate', 'mean')": 0.0,
+    "('high_conf_low_reliability_failure_rate', 'std')": 0.0,
+    "('id_accuracy', 'mean')": 0.99765625,
+    "('id_accuracy', 'std')": 0.0027312730421097733,
+    "('margin_auroc', 'mean')": 0.9982638888888888,
+    "('margin_auroc', 'std')": 0.0034722222222221947,
+    "('model', '')": "stability",
+    "('seed', 'mean')": 4.5,
+    "('seed', 'std')": 3.0276503540974917,
+    "('shift_risk_auroc', 'mean')": 0.4965248599439776,
+    "('shift_risk_auroc', 'std')": 0.2904683673334399,
+    "('shifted_accuracy', 'mean')": 0.997265625,
+    "('shifted_accuracy', 'std')": 0.004889318582166293
+  }
+]

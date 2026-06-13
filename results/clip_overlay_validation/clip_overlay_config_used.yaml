@@ -1,0 +1,12 @@
+data:
+  image_size: 224
+  n_per_class: 6
+model:
+  allow_pretrained_download: true
+  device: auto
+  model_name: ViT-B-32
+  preferred_backend: open_clip
+  pretrained_tag: laion2b_s34b_b79k
+prefer_gpu: false
+results_dir: results
+seed: 13

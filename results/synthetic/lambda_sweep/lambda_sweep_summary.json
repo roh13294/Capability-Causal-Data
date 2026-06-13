@@ -1,0 +1,31 @@
+{
+  "best_lambda_by_shifted_accuracy": {
+    "confidence_reliability_gap": 0.384804368019104,
+    "failure_auroc": null,
+    "id_accuracy": 0.99609375,
+    "lambda": 0.5,
+    "mean_shift_risk": 0.5749856233596802,
+    "shifted_accuracy": 1.0,
+    "worst_group_accuracy": 1.0
+  },
+  "erm_row": [
+    {
+      "confidence_reliability_gap": 0.2801485061645508,
+      "failure_auroc": 0.7630081300813009,
+      "id_accuracy": 1.0,
+      "lambda": 0.0,
+      "mean_shift_risk": 0.7485123872756958,
+      "shifted_accuracy": 0.9609375,
+      "worst_group_accuracy": 0.952
+    }
+  ],
+  "lambda_values": [
+    0.0,
+    0.01,
+    0.05,
+    0.1,
+    0.5,
+    1.0,
+    2.0
+  ]
+}

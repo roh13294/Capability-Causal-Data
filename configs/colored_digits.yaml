@@ -1,0 +1,15 @@
+seed: 0
+prefer_gpu: false
+results_dir: results
+epochs: 12
+batch_size: 64
+lr: 0.01
+n_counterfactuals: 4
+data:
+  n_train: 1024
+  n_test: 256
+  train_corr: 0.99
+  id_corr: 0.99
+  shift_corr: 0.99
+  shifted_mode: in_support_flip
+  noise: 0.01

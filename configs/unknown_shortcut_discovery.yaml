@@ -1,0 +1,30 @@
+results_dir: results
+seed: 0
+prefer_gpu: false
+epochs: 3
+batch_size: 64
+score_batch_size: 96
+lr: 0.003
+tasks: [synthetic, vision, text]
+synthetic:
+  n_train: 256
+  n_test: 128
+  train_corr: 0.97
+  id_corr: 0.97
+  shift_corr: 0.1
+  noise: 0.25
+  shortcut_strength: 1.4
+vision:
+  n_train: 192
+  n_test: 96
+  train_corr: 0.97
+  id_corr: 0.97
+  shift_corr: 0.1
+  image_size: 16
+  shortcut_type: color
+text:
+  n_train: 256
+  n_test: 128
+  train_corr: 0.97
+  id_corr: 0.97
+  shift_corr: 0.1

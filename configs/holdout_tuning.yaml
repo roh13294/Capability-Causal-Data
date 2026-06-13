@@ -1,0 +1,20 @@
+results_dir: results
+validation_seeds: [0, 1, 2]
+test_seeds: [10, 11, 12]
+n_examples: 96
+candidate_settings:
+  - shortcut_correlation: 0.9
+    partial_flip_fraction: 0.4
+    model_capacity: small
+    training_steps: 200
+    cic_weight: 1.0
+  - shortcut_correlation: 0.98
+    partial_flip_fraction: 0.6
+    model_capacity: medium
+    training_steps: 300
+    cic_weight: 1.0
+  - shortcut_correlation: 1.0
+    partial_flip_fraction: 0.8
+    model_capacity: medium
+    training_steps: 400
+    cic_weight: 1.2

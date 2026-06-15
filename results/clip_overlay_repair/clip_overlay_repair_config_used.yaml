@@ -1,0 +1,22 @@
+augmentation_views: 5
+confidence_threshold: 0.8
+data:
+  image_size: 224
+  regimes:
+  - aligned_overlay
+  - misleading_overlay
+  - neutral_overlay
+  - no_overlay
+  test_n_per_class: 8
+  validation_n_per_class: 2
+low_stability_threshold: 0.5
+model:
+  allow_pretrained_download: true
+  device: auto
+  model_name: ViT-B-32
+  preferred_backend: open_clip
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+prefer_gpu: false
+results_dir: results
+seed: 0

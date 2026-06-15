@@ -1,0 +1,7 @@
+Example ID: clip_overlay_007
+Domain: clip_overlay
+Original: Image of a star with overlaid text 'blue'.
+Counterfactual: Same image of a star with overlaid text 'class zero'.
+Original reference label: star
+Intended counterfactual reference label: star
+Rationale: The underlying shape stays fixed; only the overlaid shortcut text changes.

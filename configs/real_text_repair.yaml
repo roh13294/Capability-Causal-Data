@@ -1,0 +1,16 @@
+seed: 0
+results_dir: results
+sample_path: causal_reliability/data/real_text_samples.csv
+repeats: 14
+marker_strength: 4
+epochs: 120
+lr: 0.08
+confidence_threshold: 0.8
+high_confidence_threshold: 0.8
+cic_abstention_threshold: 0.5
+low_confidence_threshold: 0.0
+min_abstention_coverage: 0.4
+regimes:
+  - confidence-solvable
+  - confident-wrong
+  - mixed

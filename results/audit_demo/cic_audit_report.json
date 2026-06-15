@@ -1,0 +1,10 @@
+{
+  "mean_cic_score": 1.3122157171492852,
+  "mean_confidence": 0.86218286385286,
+  "n_examples": 4,
+  "quadrant_counts": {
+    "Dangerous shortcut reliance": 2,
+    "Generally fragile": 2
+  },
+  "required_wording": "This is a practitioner-facing audit workflow for settings where candidate shortcut interventions can be specified. It is not a turnkey solution for arbitrary models or unknown shortcuts."
+}

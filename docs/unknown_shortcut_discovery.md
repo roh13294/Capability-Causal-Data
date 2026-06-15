@@ -6,7 +6,7 @@ The candidate shortcut discovery extension relaxes that assumption in a controll
 
 Given a finite candidate intervention class, counterfactual instability can help identify candidate shortcut factors in controlled settings.
 
-This is an exploratory extension. It is not general unknown causality, and it does not solve general causal discovery.
+This is an exploratory extension. It is not general unknown causality, it does not solve general causal discovery, and it is not a turnkey solution for arbitrary unknown shortcuts.
 
 ## Candidate Shortcut Discovery Pilot: Method
 

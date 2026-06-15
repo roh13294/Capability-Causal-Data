@@ -1,0 +1,14 @@
+seed: 0
+results_dir: results
+n_examples: 180
+high_confidence_threshold: 0.8
+cic_abstention_threshold: 0.5
+repair_confidence_threshold: 0.8
+low_confidence_threshold: 0.0
+min_abstention_coverage: 0.4
+methods:
+  - original_model
+  - random_augmentation_consensus
+  - cic_guided_automatic_repair
+  - cic_guided_abstention
+  - cic_guided_repair_or_abstain

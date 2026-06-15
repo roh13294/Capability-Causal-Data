@@ -1,0 +1,62 @@
+seed: 0
+results_dir: results
+prefer_gpu: false
+
+# Final theory-gating experiment: per-input class-balance validation of the
+# finite-candidate CIC recovery theorem for the hard multi-decoy OpenCLIP
+# text-overlay repair result.
+#
+# The earlier embedding-additivity validation tested a STRONGER-than-necessary
+# condition (a single global, input-independent shortcut direction) and did not
+# support it. The recovery theorem only needs a WEAKER per-input condition: after
+# neutralization, the residual shortcut contribution to the logits should be
+# approximately class-independent for EACH individual image. A class-independent
+# logit offset cannot change the argmax, so if the residual class-dependent part
+# is below half the clean causal margin, the repaired prediction equals the clean
+# causal argmax. This experiment tests that weaker premise directly.
+#
+# Real pretrained OpenCLIP only (no fake backend for theory evidence). The frozen
+# hard multi-decoy generation policy and the CIC repair (neutralization) policy
+# are reused verbatim; nothing is reselected or tuned on the metrics below.
+frozen_policy_dir: results/hard_multidecoy_clip_repair
+
+# Number of candidate text-region proposals for non-oracle CIC discovery. Matches
+# the hard multi-decoy default (96), which retains matched random_patch_control
+# proposals for the matched-random neutralization control. Not tuned on metrics.
+max_candidates: 96
+include_watermark: true
+
+# A-priori decision thresholds. Fixed BEFORE running; NOT tuned on the observed
+# metrics. They gate per_input_class_balance_supported_for_text and
+# clip_theory_support_status.
+thresholds:
+  # Per-input class-balance error tolerance epsilon_B, in CLIP logit units
+  # (logit = 100 * cosine). An example's residual-to-clean class-dependent shift
+  # max_y |delta_to_clean_y - mean_y delta_to_clean| <= epsilon_B counts as
+  # "class-balanced" for that input. Reported as a diagnostic; the scale-free
+  # margin condition (margin_clean > 2*residual) is the primary per-input test.
+  class_balance_epsilon_b: 3.0
+  # Oracle/CIC neutralization counts as "substantially more class-balanced than
+  # random" iff its median residual-to-clean is at or below this fraction of the
+  # matched-random median residual-to-clean.
+  balance_advantage_fraction: 0.75
+  # Minimum repair-success rate among margin-satisfied examples for the margin
+  # diagnostic to count as predictive.
+  margin_success_min: 0.50
+  # Minimum fraction of repaired examples whose margin condition is satisfied for
+  # the class-balance condition to count as holding on a substantial fraction.
+  repaired_balance_fraction_min: 0.50
+
+data:
+  image_size: 224            # CLIP-native resolution
+  text_n_per_class: 8        # 4 classes * 8 = 32 misleading text examples
+  watermark_n_per_class: 6   # 4 classes * 6 = 24 misleading watermark examples
+  watermark_benchmark_seed: 5151
+
+model:
+  preferred_backend: open_clip
+  model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+  allow_pretrained_download: true
+  device: auto

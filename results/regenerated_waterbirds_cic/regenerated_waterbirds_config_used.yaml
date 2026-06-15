@@ -1,0 +1,41 @@
+data:
+  allow_download: false
+  bird_crop_margin: 0.15
+  cub_root: data/cub/CUB_200_2011
+  cub_segmentations_root: data/cub/segmentations
+  image_size: 224
+  max_examples: 400
+  min_backgrounds_per_type: 5
+  min_examples: 4
+  neutral_fill_gray: 0.5
+  official_class_map: null
+  output_root: data/regenerated_waterbirds
+  places_root: data/places
+  seed: 0
+eligibility:
+  cic_beats_random_abs: 0.15
+  failure_confidence_threshold: 0.5
+  min_aligned_preservation: 0.7
+  min_failure_conditioned: 30
+  min_natural: 100
+  misleading_below_aligned_abs: 0.1
+  oracle_fc_restore: 0.8
+  oracle_min_gain_abs: 0.15
+intervention:
+  background_fill_gray: 0.5
+  blur_radius_frac: 0.045
+  crop_pad_frac: 0.1
+  top_k: 3
+model:
+  allow_pretrained_download: true
+  device: auto
+  model_name: ViT-B-32
+  preferred_backend: open_clip
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+prefer_gpu: false
+prompts:
+  landbird: a photo of a landbird
+  waterbird: a photo of a waterbird
+results_dir: results
+seed: 0

@@ -1,0 +1,7 @@
+Example ID: colored_digits_007
+Domain: colored_digits
+Original: Digit 7 rendered in pink.
+Counterfactual: The same digit 7 rendered in red.
+Original reference label: 7
+Intended counterfactual reference label: 7
+Rationale: The digit identity is unchanged; only the shortcut color changes.

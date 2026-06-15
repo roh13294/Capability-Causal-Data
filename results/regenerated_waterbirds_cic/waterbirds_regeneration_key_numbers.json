@@ -1,0 +1,16 @@
+{
+  "cub_available": false,
+  "cub_segmentations_available": false,
+  "missing": [
+    "images.txt",
+    "image_class_labels.txt",
+    "classes.txt",
+    "bounding_boxes.txt",
+    "images/"
+  ],
+  "places_available": false,
+  "regenerated_waterbirds_available": false,
+  "regenerated_waterbirds_headline_eligible": false,
+  "skip_reason": "Regenerated Waterbirds pilot skipped: CUB-200-2011 image assets not found. Missing: images.txt, image_class_labels.txt, classes.txt, bounding_boxes.txt, images/",
+  "waterbirds_headline_eligible": false
+}

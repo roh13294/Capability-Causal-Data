@@ -1,0 +1,15 @@
+{
+  "max_clean_drop": 0.05,
+  "min_consensus_stability": 0.6666666667,
+  "note": "Selected on validation only; non-oracle test scoring receives image pixels, CLIP predictions, class prompts, and candidate proposals only.",
+  "objective": "validation_clean_safe_repair",
+  "score_threshold": 0.13239137666598882,
+  "validation_metrics": {
+    "clean_accuracy_drop": 0.0,
+    "coverage": 1.0,
+    "false_repair_rate": 0.0,
+    "min_consensus_stability": 0.6666666667,
+    "misleading_repair_accuracy": null,
+    "score_threshold": 0.13239137666598882
+  }
+}

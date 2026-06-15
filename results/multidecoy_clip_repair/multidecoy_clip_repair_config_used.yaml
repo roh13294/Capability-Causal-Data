@@ -1,0 +1,29 @@
+augmentation_views: 5
+data:
+  image_size: 224
+  n_text_boxes: 5
+  regimes:
+  - multi_decoy_misleading
+  - multi_decoy_aligned
+  - multi_decoy_neutral
+  - no_overlay
+  test_n_per_class: 8
+  validation_n_per_class: 8
+max_candidates: 96
+model:
+  allow_pretrained_download: true
+  device: auto
+  model_name: ViT-B-32
+  preferred_backend: open_clip
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+policy:
+  max_clean_drop: 0.05
+  min_consensus_grid:
+  - 0.6666666667
+  - 1.0
+  objective: validation_clean_safe_repair
+prefer_gpu: false
+random_draws: 100
+results_dir: results
+seed: 0

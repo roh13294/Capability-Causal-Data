@@ -1,0 +1,62 @@
+# Regenerated Waterbirds-style spurious-background CIC pilot.
+#
+# OPTIONAL supporting evidence, NOT a replacement for the main OpenCLIP
+# text-overlay headline. Regenerates a Waterbirds-like benchmark by compositing
+# CUB-200-2011 birds (with their pixel-perfect segmentation masks) onto Places
+# land/water backgrounds, giving an oracle background intervention.
+#
+# The pilot SKIPS cleanly (never fabricates) if CUB images, CUB segmentation
+# masks, or Places backgrounds are unavailable. Large datasets are NEVER
+# downloaded automatically (allow_download default false). Headline eligibility
+# is gated (PART 9 of the spec).
+seed: 0
+results_dir: results
+prefer_gpu: false
+
+data:
+  cub_root: data/cub/CUB_200_2011
+  cub_segmentations_root: data/cub/segmentations
+  places_root: data/places
+  output_root: data/regenerated_waterbirds
+  # Large data is never downloaded unless this is explicitly true; even then the
+  # script only PRINTS documented placement instructions (no scraping).
+  allow_download: false
+  max_examples: 400
+  min_examples: 4                 # below this -> skip (too few usable composites)
+  seed: 0
+  image_size: 224
+  bird_crop_margin: 0.15          # margin around the CUB bbox before compositing
+  neutral_fill_gray: 0.5          # gray value for the neutral-background regime
+  min_backgrounds_per_type: 5     # need at least this many land AND water backgrounds
+  # Optional path to an official landbird/waterbird class mapping. If absent, a
+  # transparent keyword heuristic is used and marked as heuristic in artifacts.
+  official_class_map: null
+
+prompts:
+  # Single predeclared primary prompt pair.
+  landbird: "a photo of a landbird"
+  waterbird: "a photo of a waterbird"
+
+intervention:
+  background_fill_gray: 0.5       # neutral gray fill value in [0,1]
+  blur_radius_frac: 0.045         # gaussian blur radius as fraction of max(H,W)
+  crop_pad_frac: 0.10             # padding around bird bbox for crop intervention
+  top_k: 3                        # CIC top-k consensus size
+
+eligibility:
+  min_natural: 100                # >=100 natural OR >=30 failure-conditioned
+  min_failure_conditioned: 30
+  failure_confidence_threshold: 0.50
+  misleading_below_aligned_abs: 0.10
+  oracle_min_gain_abs: 0.15       # oracle improves misleading by >= this OR ...
+  oracle_fc_restore: 0.80         # ... restores >= this on failure-conditioned
+  cic_beats_random_abs: 0.15
+  min_aligned_preservation: 0.70
+
+model:
+  preferred_backend: open_clip
+  model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+  allow_pretrained_download: true # model weights only; dataset governed by data.allow_download
+  device: auto

@@ -1,0 +1,69 @@
+# Scale-and-multi-model replication audit for the hard multi-decoy text-overlay
+# benchmark. This is a SUPPORTING experiment. It does not change and does not
+# overwrite the frozen primary headline (ViT-B-32 / laion2b_s34b_b79k at n=32),
+# which lives under results/hard_multidecoy_clip_repair/.
+#
+# It addresses two reviewer concerns:
+#   A. larger-n stability (n_per_condition = 128 by default; 256 optional)
+#   B. multi-model replication across available OpenCLIP backbones/checkpoints
+#
+# The fake CLIP backend is never headline eligible here.
+
+seed: 0
+results_dir: results
+
+# Larger-n benchmark. n_per_condition is the number of examples per regime
+# (no-overlay / aligned / neutral / misleading). test_n_per_class is derived as
+# n_per_condition // class_set_size of the frozen generation policy (4 classes ->
+# 32 per class -> 128 per condition). Set to 256 if runtime is acceptable.
+n_per_condition: 128
+
+# Distinct benchmark instance from the n=32 headline: a resampled held-out set
+# drawn with this benchmark seed, so the generated benchmark hashes differ from
+# the frozen headline benchmark.
+benchmark_seed: 73019
+resample_benchmark: true
+
+# Repair search budget. Random matched-text baseline repeats are reduced from the
+# headline's 100 to keep the multi-model x larger-n runtime bounded; this is
+# reported in the audit outputs.
+max_candidates: 96
+augmentation_views: 5
+random_draws: 25
+
+# Freeze the generation and repair policies to the frozen headline selection so
+# all models are evaluated on the identical hard multi-decoy construction. If
+# these files are missing the per-model runs fall back to selecting their own
+# policies (still valid, just not policy-frozen).
+frozen_generation_policy_path: results/hard_multidecoy_clip_repair/selected_generation_policy.json
+frozen_repair_policy_path: results/hard_multidecoy_clip_repair/selected_repair_policy.json
+
+# Headline eligibility gates, enforced per model.
+gates:
+  max_misleading_accuracy: 0.40   # original misleading accuracy must be this low (shortcut vulnerable)
+  min_cic_random_gap: 0.15        # CIC top-1 must beat matched random text by at least this
+  max_clean_safe_drop: 0.10       # clean-safe repair must not drop clean accuracy more than this
+  min_hard_misleading_n: 64       # need a reasonably large misleading subset to be eligible
+
+data:
+  validation_n_per_class: 8
+  image_size: 224
+
+model:
+  preferred_backend: open_clip
+  allow_pretrained_download: true
+  device: auto
+
+# Candidate OpenCLIP model / pretrained-checkpoint pairs. The headline model is
+# always included and is detected automatically; do not remove it. Pairs not
+# present in open_clip.list_pretrained() are skipped (not fatal), and pairs that
+# fail to load are skipped with the load error recorded.
+models:
+  - model_name: ViT-B-32
+    pretrained_tag: laion2b_s34b_b79k   # frozen headline backbone/checkpoint
+  - model_name: ViT-B-32
+    pretrained_tag: openai
+  - model_name: ViT-B-16
+    pretrained_tag: laion2b_s34b_b88k
+  - model_name: RN50
+    pretrained_tag: openai

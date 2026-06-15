@@ -1,0 +1,3 @@
+results_dir: results
+examples_per_domain: 12
+max_per_domain: 12

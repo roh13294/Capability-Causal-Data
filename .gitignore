@@ -6,3 +6,8 @@ results/**/*.csv
 results/**/*.png
 results/**/*.pt
 !results/.gitkeep
+
+data/wilds/
+__pycache__/
+.pytest_cache/
+.DS_Store

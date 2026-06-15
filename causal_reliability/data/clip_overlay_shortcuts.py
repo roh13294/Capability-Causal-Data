@@ -6,7 +6,7 @@ from typing import Any
 
 import numpy as np
 import torch
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 from causal_reliability.utils.io import ensure_dir
 
@@ -44,9 +44,10 @@ def render_overlay_image(
     overlay_label: int,
     size: int = 224,
     neutral_word: str | None = None,
+    draw_overlay: bool = True,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     name = CLIP_OVERLAY_CLASSES[label]
-    overlay_word = neutral_word or CLIP_OVERLAY_CLASSES[overlay_label]
+    overlay_word = CLIP_OVERLAY_CLASSES[overlay_label] if neutral_word is None else neutral_word
     img = Image.new("RGB", (size, size), (238, 240, 235))
     draw = ImageDraw.Draw(img)
     shape_mask_img = Image.new("L", (size, size), 0)
@@ -76,9 +77,11 @@ def render_overlay_image(
     x = max(4, (size - tw) // 2)
     y = int(size * 0.72)
     pad = max(4, size // 45)
-    draw.rounded_rectangle([x - pad, y - pad, x + tw + pad, y + th + pad], radius=3, fill=(255, 255, 255))
-    draw.text((x, y), overlay_word, font=font, fill=(180, 20, 24))
-    text_draw.rectangle([x - pad, y - pad, x + tw + pad, y + th + pad], fill=255)
+    overlay_bbox = [int(x - pad), int(y - pad), int(x + tw + pad), int(y + th + pad)]
+    if draw_overlay and overlay_word:
+        draw.rounded_rectangle(overlay_bbox, radius=3, fill=(255, 255, 255))
+        draw.text((x, y), overlay_word, font=font, fill=(180, 20, 24))
+        text_draw.rectangle(overlay_bbox, fill=255)
 
     arr = np.asarray(img).astype(np.float32) / 255.0
     shape_mask = np.asarray(shape_mask_img) > 0
@@ -93,7 +96,29 @@ def render_overlay_image(
         "text_mask": text_mask,
         "shortcut_mask": text_mask,
         "background_mask": background_mask,
+        "overlay_bbox": overlay_bbox,
     }
+
+
+def neutralize_overlay_array(image: np.ndarray, bbox: list[int], strategy: str, size: int | None = None) -> np.ndarray:
+    arr = np.asarray(image).copy()
+    h, w = arr.shape[:2]
+    x0, y0, x1, y1 = [int(v) for v in bbox]
+    x0, y0 = max(0, x0), max(0, y0)
+    x1, y1 = min(w, x1), min(h, y1)
+    if strategy in {"mask_overlay_bbox_background", "replace_overlay_bbox_background"}:
+        arr[y0:y1, x0:x1, :] = np.array([238, 240, 235], dtype=np.float32) / 255.0
+        return arr
+    if strategy == "blur_overlay_bbox":
+        pil = Image.fromarray((arr * 255).astype(np.uint8))
+        patch = pil.crop((x0, y0, x1, y1)).filter(ImageFilter.GaussianBlur(radius=max(2, (size or w) // 32)))
+        pil.paste(patch, (x0, y0))
+        return np.asarray(pil).astype(np.float32) / 255.0
+    if strategy == "crop_out_overlay":
+        cropped = arr[: max(1, y0), :, :]
+        pil = Image.fromarray((cropped * 255).astype(np.uint8)).resize((w, h), Image.Resampling.BICUBIC)
+        return np.asarray(pil).astype(np.float32) / 255.0
+    return arr
 
 
 def _overlay_for(label: int, regime: str, index: int, n_classes: int) -> int:
@@ -110,33 +135,59 @@ def make_clip_overlay_dataset(
     n_per_class: int = 8,
     size: int = 224,
     regimes: list[str] | None = None,
+    split: str = "test",
+    start_id: int = 0,
 ) -> ClipOverlayBundle:
-    regimes = regimes or ["aligned_overlay", "misleading_overlay", "mixed_overlay"]
+    regimes = regimes or ["aligned_overlay", "misleading_overlay", "mixed_overlay", "neutral_overlay", "no_overlay"]
     examples: list[dict[str, Any]] = []
-    example_id = 0
+    example_id = start_id
     n_classes = len(CLIP_OVERLAY_CLASSES)
     for regime in regimes:
         for label, class_name in enumerate(CLIP_OVERLAY_CLASSES):
             for j in range(n_per_class):
-                overlay = _overlay_for(label, regime, j, n_classes)
-                image, meta = render_overlay_image(label, overlay, size=size)
-                no_text, no_text_meta = render_overlay_image(label, overlay, size=size, neutral_word="")
+                if regime == "neutral_overlay":
+                    overlay = label
+                    image, meta = render_overlay_image(label, overlay, size=size, neutral_word=["object", "shape", "image"][j % 3])
+                    overlay_relation = "neutral"
+                elif regime == "no_overlay":
+                    overlay = label
+                    image, meta = render_overlay_image(label, overlay, size=size, neutral_word="", draw_overlay=False)
+                    overlay_relation = "none"
+                else:
+                    overlay = _overlay_for(label, regime, j, n_classes)
+                    image, meta = render_overlay_image(label, overlay, size=size)
+                    overlay_relation = "aligned" if overlay == label else "misleading"
+                no_text, no_text_meta = render_overlay_image(label, overlay, size=size, neutral_word="", draw_overlay=False)
                 neutral, neutral_meta = render_overlay_image(label, overlay, size=size, neutral_word="object")
+                neutral_shape, neutral_shape_meta = render_overlay_image(label, overlay, size=size, neutral_word="shape")
                 correct, correct_meta = render_overlay_image(label, label, size=size)
                 other = (label + 2) % n_classes
                 other_img, other_meta = render_overlay_image(label, other, size=size)
+                masked = neutralize_overlay_array(image, meta["overlay_bbox"], "mask_overlay_bbox_background", size)
+                blurred = neutralize_overlay_array(image, meta["overlay_bbox"], "blur_overlay_bbox", size)
+                cropped = neutralize_overlay_array(image, meta["overlay_bbox"], "crop_out_overlay", size)
                 examples.append(
                     {
                         "example_id": example_id,
+                        "split": split,
                         "regime": regime,
                         "label": label,
+                        "true_label": class_name,
                         "class_name": class_name,
                         "shortcut": meta["overlay_word"],
+                        "overlay_text": meta["overlay_word"] if overlay_relation != "none" else "",
                         "shortcut_label": overlay,
+                        "overlay_relation": overlay_relation,
+                        "overlay_bbox": meta["overlay_bbox"],
                         "image": image,
                         "counterfactual_image": neutral,
                         "overlay_removed_image": no_text,
                         "neutral_overlay_image": neutral,
+                        "neutral_word_overlay_image": neutral_shape,
+                        "mask_overlay_bbox_background_image": masked,
+                        "replace_overlay_bbox_background_image": masked,
+                        "blur_overlay_bbox_image": blurred,
+                        "crop_out_overlay_image": cropped,
                         "correct_overlay_image": correct,
                         "other_overlay_image": other_img,
                         "object_mask": meta["object_mask"],
@@ -145,6 +196,7 @@ def make_clip_overlay_dataset(
                         "text_mask": meta["text_mask"],
                         "background_mask": meta["background_mask"],
                         "counterfactual_text_mask": neutral_meta["text_mask"],
+                        "neutral_word_text_mask": neutral_shape_meta["text_mask"],
                         "removed_text_mask": no_text_meta["text_mask"],
                         "correct_text_mask": correct_meta["text_mask"],
                         "other_text_mask": other_meta["text_mask"],
@@ -152,6 +204,29 @@ def make_clip_overlay_dataset(
                 )
                 example_id += 1
     return ClipOverlayBundle(examples, CLIP_OVERLAY_CLASSES.copy())
+
+
+def save_example_images(examples: list[dict[str, Any]], out_dir: str | Path, keys: list[str] | None = None) -> None:
+    keys = keys or [
+        "image",
+        "overlay_removed_image",
+        "neutral_overlay_image",
+        "neutral_word_overlay_image",
+        "mask_overlay_bbox_background_image",
+        "replace_overlay_bbox_background_image",
+        "blur_overlay_bbox_image",
+        "crop_out_overlay_image",
+    ]
+    root = ensure_dir(out_dir)
+    for ex in examples:
+        ex_dir = ensure_dir(root / str(ex["split"]) / str(ex["regime"]))
+        for key in keys:
+            arr = ex.get(key)
+            if arr is None:
+                continue
+            path = ex_dir / f"{ex['example_id']}_{key}.png"
+            Image.fromarray((np.asarray(arr).clip(0, 1) * 255).astype(np.uint8)).save(path)
+            ex[f"{key}_path"] = str(path)
 
 
 def examples_to_tensor(examples: list[dict[str, Any]], key: str = "image") -> torch.Tensor:

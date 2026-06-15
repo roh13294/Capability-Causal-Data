@@ -1,0 +1,24 @@
+data:
+  decoy_frac: 0.34
+  image_size: 224
+  n_per_condition: 64
+  object_frac: 0.46
+  regimes:
+  - no_decoy
+  - misleading_decoy
+  - aligned_decoy
+  test_n_per_condition: 64
+  validation_n_per_condition: 16
+gate_min_clean_accuracy: 0.8
+max_clean_drop: 0.05
+model:
+  allow_pretrained_download: false
+  device: auto
+  model_name: ViT-B-32
+  preferred_backend: open_clip
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+n_random_candidates: 3
+prefer_gpu: false
+results_dir: results
+seed: 0

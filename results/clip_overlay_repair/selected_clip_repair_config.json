@@ -1,0 +1,9 @@
+{
+  "aligned_accuracy_drop": 0.0,
+  "neutralization_strategy": "mask_overlay_bbox_background",
+  "neutralized_misleading_accuracy": 1.0,
+  "no_overlay_accuracy": 1.0,
+  "prompt_template": "a photo of a {label}",
+  "selection_score": 2.0,
+  "source_split": "validation"
+}

@@ -1,0 +1,72 @@
+augmentation_views: 5
+benchmark_seed: 73019
+data:
+  image_size: 224
+  test_n_per_class: 32
+  validation_n_per_class: 8
+frozen_generation_policy:
+  class_set_size: 4
+  decoy_near_object: false
+  decoy_placement: away
+  decoy_text_size: 224
+  harmful_near_object: true
+  harmful_placement: over_object
+  harmful_text_size: 224
+  n_decoys: 4
+  neutral_decoy_vocabulary:
+  - image
+  - object
+  - shape
+  - figure
+  - sample
+  - panel
+  - visual
+  - mark
+  policy_id: hard_gen_0011
+  repeat_harmful_word: true
+  text_box_background: true
+  text_color:
+  - 30
+  - 30
+  - 30
+  text_opacity: 1.0
+frozen_repair_policy:
+  max_clean_drop: 0.05
+  min_consensus_stability: 0.6666666667
+  note: Selected on validation only; non-oracle test scoring receives image pixels,
+    CLIP predictions, class prompts, and candidate proposals only.
+  objective: validation_clean_safe_repair
+  score_threshold: 0.13239137666598882
+  validation_metrics:
+    clean_accuracy_drop: 0.0
+    coverage: 1.0
+    false_repair_rate: 0.0
+    min_consensus_stability: 0.6666666667
+    misleading_repair_accuracy: null
+    score_threshold: 0.13239137666598882
+gates:
+  max_clean_safe_drop: 0.1
+  max_misleading_accuracy: 0.4
+  min_cic_random_gap: 0.15
+  min_hard_misleading_n: 64
+max_candidates: 96
+model:
+  allow_pretrained_download: true
+  device: auto
+  model_name: ViT-B-16
+  preferred_backend: open_clip
+  pretrained_tag: laion2b_s34b_b88k
+models:
+- model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+- model_name: ViT-B-32
+  pretrained_tag: openai
+- model_name: ViT-B-16
+  pretrained_tag: laion2b_s34b_b88k
+- model_name: RN50
+  pretrained_tag: openai
+n_per_condition: 128
+random_draws: 25
+resample_benchmark: true
+results_dir: results/hard_multidecoy_scale_model_audit/runs/ViT-B-16__laion2b_s34b_b88k
+seed: 0

@@ -1,0 +1,29 @@
+{
+  "all_passed": false,
+  "failed_gates": [
+    "misleading_original_le_0_40"
+  ],
+  "gates": {
+    "cic_top1_minus_random_ge_0_15": true,
+    "clean_accuracy_high": true,
+    "clean_safe_drop_le_0_10": true,
+    "fake_backend_excluded": true,
+    "misleading_original_le_0_40": false,
+    "no_scorer_leakage": true,
+    "oracle_repair_ge_0_85": true,
+    "pretrained_loaded": true
+  },
+  "values": {
+    "cic_clean_safe_accuracy": 0.90625,
+    "cic_minus_random_gap": 0.296875,
+    "cic_top1_accuracy": 0.734375,
+    "cic_top3_accuracy": 0.515625,
+    "clean_accuracy": 1.0,
+    "clean_safe_clean_drop": 0.0,
+    "clean_safe_score_threshold": 0.6851640934175018,
+    "matched_random_accuracy": 0.4375,
+    "min_clean_accuracy_threshold": 0.8,
+    "misleading_original_accuracy": 0.578125,
+    "oracle_repair_accuracy": 0.96875
+  }
+}

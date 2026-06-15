@@ -1,0 +1,29 @@
+{
+  "class_set_size": 4,
+  "decoy_near_object": false,
+  "decoy_placement": "away",
+  "decoy_text_size": 224,
+  "harmful_near_object": true,
+  "harmful_placement": "over_object",
+  "harmful_text_size": 224,
+  "n_decoys": 4,
+  "neutral_decoy_vocabulary": [
+    "image",
+    "object",
+    "shape",
+    "figure",
+    "sample",
+    "panel",
+    "visual",
+    "mark"
+  ],
+  "policy_id": "hard_gen_0011",
+  "repeat_harmful_word": true,
+  "text_box_background": true,
+  "text_color": [
+    30,
+    30,
+    30
+  ],
+  "text_opacity": 1.0
+}

@@ -1,0 +1,3 @@
+# Per-Input Class-Balance Figure Caption
+
+Per-input logit-shift class-balance for the hard multi-decoy OpenCLIP text-overlay repair, by neutralization condition (oracle, CIC top-1, CIC top-3 consensus, matched random text region; watermark oracle shown for contrast). Red bars: median per-input residual-to-clean class-dependent perturbation `max_y |delta_to_clean_y - mean_y delta_to_clean|` (lower = more class-balanced). Green/blue bars: margin-condition satisfaction rate and repair accuracy. Oracle/CIC neutralization is more class-balanced than matched random neutralization when the recovery theorem's weaker per-input premise holds.

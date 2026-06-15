@@ -1,0 +1,7 @@
+Example ID: colored_digits_002
+Domain: colored_digits
+Original: Digit 2 rendered in green.
+Counterfactual: The same digit 2 rendered in cyan.
+Original reference label: 2
+Intended counterfactual reference label: 2
+Rationale: The digit identity is unchanged; only the shortcut color changes.

@@ -1,0 +1,7 @@
+Example ID: clip_overlay_009
+Domain: clip_overlay
+Original: Image of a square with overlaid text 'class zero'.
+Counterfactual: Same image of a square with overlaid text 'truck'.
+Original reference label: square
+Intended counterfactual reference label: square
+Rationale: The underlying shape stays fixed; only the overlaid shortcut text changes.

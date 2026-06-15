@@ -1,0 +1,144 @@
+{
+  "class_set_size": 4,
+  "do_not_claim": "This audit does not claim open-world shortcut discovery, general robustness, cross-shortcut generalization, or exact localization. The method searches a finite candidate class of text-region proposals on a controlled synthetic text-overlay benchmark.",
+  "fake_backend_allowed": false,
+  "fake_backend_requested": false,
+  "headline_model_eligible": true,
+  "headline_model_protected": true,
+  "headline_model_protected_note": "The frozen primary headline (ViT-B-32 / laion2b_s34b_b79k at n=32) under results/hard_multidecoy_clip_repair/ is not modified by this audit.",
+  "interpretation_statements": [
+    "The main text-overlay result is stable at larger n.",
+    "The text-overlay CIC effect replicates across multiple pretrained OpenCLIP backbones/checkpoints."
+  ],
+  "larger_n_stable": true,
+  "models_attempted": [
+    {
+      "model_name": "ViT-B-32",
+      "pretrained_tag": "laion2b_s34b_b79k"
+    },
+    {
+      "model_name": "ViT-B-32",
+      "pretrained_tag": "openai"
+    },
+    {
+      "model_name": "ViT-B-16",
+      "pretrained_tag": "laion2b_s34b_b88k"
+    },
+    {
+      "model_name": "RN50",
+      "pretrained_tag": "openai"
+    }
+  ],
+  "models_loaded": [
+    {
+      "model_name": "ViT-B-32",
+      "pretrained_tag": "laion2b_s34b_b79k"
+    },
+    {
+      "model_name": "ViT-B-32",
+      "pretrained_tag": "openai"
+    },
+    {
+      "model_name": "ViT-B-16",
+      "pretrained_tag": "laion2b_s34b_b88k"
+    },
+    {
+      "model_name": "RN50",
+      "pretrained_tag": "openai"
+    }
+  ],
+  "models_skipped": [],
+  "multi_model_replicates": true,
+  "n_eligible_models": 4,
+  "n_loaded_models": 4,
+  "n_per_condition": 128,
+  "outputs": {
+    "key_numbers": "results/hard_multidecoy_scale_model_audit/scale_model_key_numbers.json",
+    "metrics": "results/hard_multidecoy_scale_model_audit/scale_model_metrics.csv",
+    "model_availability": "results/hard_multidecoy_scale_model_audit/model_availability.csv",
+    "plot": "results/hard_multidecoy_scale_model_audit/scale_model_plot.png",
+    "summary": "results/hard_multidecoy_scale_model_audit/scale_model_summary.md"
+  },
+  "per_model": [
+    {
+      "aligned_accuracy": 1.0,
+      "benchmark_hash": "b896599c8b91c3bf87338c5cd5e0592b5f16a2dafa25632d4c5868ff7269bd41",
+      "cic_clean_safe_repair_accuracy": 0.7188,
+      "cic_top1_minus_matched_random_gap": 0.4372,
+      "cic_top1_repair_accuracy": 0.7422,
+      "cic_top3_repair_accuracy": 0.744,
+      "clean_safe_clean_drop": 0.0365,
+      "eligibility_reasons": "all gates passed",
+      "eligibility_status": "repair_eligible",
+      "headline_eligible": true,
+      "headline_model": true,
+      "matched_random_repair_accuracy": 0.305,
+      "model_name": "ViT-B-32",
+      "n_hard_misleading_examples": 128,
+      "no_overlay_accuracy": 1.0,
+      "original_misleading_accuracy": 0.2891,
+      "pretrained_loaded": true,
+      "pretrained_tag": "laion2b_s34b_b79k"
+    },
+    {
+      "aligned_accuracy": 1.0,
+      "benchmark_hash": "b896599c8b91c3bf87338c5cd5e0592b5f16a2dafa25632d4c5868ff7269bd41",
+      "cic_clean_safe_repair_accuracy": 0.5312,
+      "cic_top1_minus_matched_random_gap": 0.5763,
+      "cic_top1_repair_accuracy": 0.6875,
+      "cic_top3_repair_accuracy": 0.7615,
+      "clean_safe_clean_drop": 0.0026,
+      "eligibility_reasons": "all gates passed",
+      "eligibility_status": "repair_eligible",
+      "headline_eligible": true,
+      "headline_model": false,
+      "matched_random_repair_accuracy": 0.1113,
+      "model_name": "ViT-B-32",
+      "n_hard_misleading_examples": 128,
+      "no_overlay_accuracy": 1.0,
+      "original_misleading_accuracy": 0.0625,
+      "pretrained_loaded": true,
+      "pretrained_tag": "openai"
+    },
+    {
+      "aligned_accuracy": 1.0,
+      "benchmark_hash": "b896599c8b91c3bf87338c5cd5e0592b5f16a2dafa25632d4c5868ff7269bd41",
+      "cic_clean_safe_repair_accuracy": 0.6562,
+      "cic_top1_minus_matched_random_gap": 0.7781,
+      "cic_top1_repair_accuracy": 0.9375,
+      "cic_top3_repair_accuracy": 0.9259,
+      "clean_safe_clean_drop": 0.0,
+      "eligibility_reasons": "all gates passed",
+      "eligibility_status": "repair_eligible",
+      "headline_eligible": true,
+      "headline_model": false,
+      "matched_random_repair_accuracy": 0.1594,
+      "model_name": "ViT-B-16",
+      "n_hard_misleading_examples": 128,
+      "no_overlay_accuracy": 1.0,
+      "original_misleading_accuracy": 0.0781,
+      "pretrained_loaded": true,
+      "pretrained_tag": "laion2b_s34b_b88k"
+    },
+    {
+      "aligned_accuracy": 1.0,
+      "benchmark_hash": "b896599c8b91c3bf87338c5cd5e0592b5f16a2dafa25632d4c5868ff7269bd41",
+      "cic_clean_safe_repair_accuracy": 0.5781,
+      "cic_top1_minus_matched_random_gap": 0.6863,
+      "cic_top1_repair_accuracy": 0.7578,
+      "cic_top3_repair_accuracy": 0.7619,
+      "clean_safe_clean_drop": 0.0,
+      "eligibility_reasons": "all gates passed",
+      "eligibility_status": "repair_eligible",
+      "headline_eligible": true,
+      "headline_model": false,
+      "matched_random_repair_accuracy": 0.0716,
+      "model_name": "RN50",
+      "n_hard_misleading_examples": 128,
+      "no_overlay_accuracy": 1.0,
+      "original_misleading_accuracy": 0.0,
+      "pretrained_loaded": true,
+      "pretrained_tag": "openai"
+    }
+  ]
+}

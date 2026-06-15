@@ -1,0 +1,7 @@
+Example ID: clip_overlay_010
+Domain: clip_overlay
+Original: Image of a triangle with overlaid text 'cat'.
+Counterfactual: Same image of a triangle with overlaid text 'blue'.
+Original reference label: triangle
+Intended counterfactual reference label: triangle
+Rationale: The underlying shape stays fixed; only the overlaid shortcut text changes.

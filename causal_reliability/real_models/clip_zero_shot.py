@@ -41,6 +41,8 @@ def _backend_order(preferred_backend: str) -> list[str]:
     backend = (preferred_backend or "open_clip").strip().lower()
     if backend == "auto":
         return ["open_clip", "transformers"]
+    if backend == "open_clip":
+        return ["open_clip", "transformers"]
     if backend in {"open_clip", "transformers"}:
         return [backend]
     return [backend]
@@ -122,6 +124,7 @@ def check_clip_available(
     preferred_backend: str = "open_clip",
     model_name: str | None = None,
     pretrained_tag: str = DEFAULT_PRETRAINED_TAG,
+    transformers_model_name: str | None = None,
 ) -> ClipStatus:
     backend_attempted = preferred_backend or "open_clip"
     errors: list[str] = []
@@ -133,7 +136,8 @@ def check_clip_available(
                 errors.append(f"open_clip unavailable: {exc}")
         elif backend == "transformers":
             try:
-                return _transformers_status(device, model_name or DEFAULT_TRANSFORMERS_MODEL, allow_download, backend_attempted)
+                tf_name = transformers_model_name or (model_name if model_name and "/" in model_name else DEFAULT_TRANSFORMERS_MODEL)
+                return _transformers_status(device, tf_name, allow_download, backend_attempted)
             except Exception as exc:
                 errors.append(f"transformers CLIP unavailable: {exc}")
         else:
@@ -159,6 +163,7 @@ def load_clip_model(
     preferred_backend: str = "open_clip",
     model_name: str | None = None,
     pretrained_tag: str = DEFAULT_PRETRAINED_TAG,
+    transformers_model_name: str | None = None,
 ) -> ClipStatus:
     return check_clip_available(
         device=device,
@@ -166,6 +171,7 @@ def load_clip_model(
         preferred_backend=preferred_backend,
         model_name=model_name,
         pretrained_tag=pretrained_tag,
+        transformers_model_name=transformers_model_name,
     )
 
 
@@ -218,10 +224,22 @@ class ClipZeroShotClassifier:
         self._text_features: torch.Tensor | None = None
 
     def predict(self, images: torch.Tensor) -> dict[str, Any]:
-        result = predict_zero_shot(images, self.class_names, self.status, self.device, self.prompts)
-        if not result.get("available", False):
-            raise RuntimeError(result.get("message", "CLIP unavailable"))
-        return result
+        if not self.status.available:
+            raise RuntimeError(self.status.error_message or "CLIP unavailable")
+        if self._text_features is None:
+            self._text_features = encode_text_prompts(self.status, self.prompts, self.device)
+        image_features = encode_images(self.status, images, self.device)
+        logits = 100.0 * image_features @ self._text_features.T
+        probs = torch.softmax(logits, dim=1)
+        conf, pred = probs.max(dim=1)
+        return {
+            "available": True,
+            "backend": self.status.backend,
+            "logits": logits.detach().cpu(),
+            "probabilities": probs.detach().cpu(),
+            "predictions": pred.detach().cpu(),
+            "confidence": conf.detach().cpu(),
+        }
 
 
 def predict_zero_shot(

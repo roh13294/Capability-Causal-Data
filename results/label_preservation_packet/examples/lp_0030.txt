@@ -1,0 +1,7 @@
+Example ID: pos_008_r0
+Domain: real_text_shortcut
+Original: nan
+Counterfactual: nan
+Original reference label: 1
+Intended counterfactual reference label: 1
+Rationale: The review content is unchanged; only neutral source metadata changes.

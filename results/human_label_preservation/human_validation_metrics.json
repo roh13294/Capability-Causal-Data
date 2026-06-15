@@ -1,0 +1,24 @@
+{
+  "data_source": "raw_annotations",
+  "n_annotators": 3,
+  "n_pairs": 100,
+  "total_annotations": 300,
+  "majority_before_label_accuracy": null,
+  "majority_after_label_accuracy": null,
+  "majority_label_preservation_rate": 0.96,
+  "majority_after_recognizable_rate": 0.97,
+  "unsure_rate": 0.0,
+  "percent_agreement": {
+    "before_label": 0.98,
+    "after_label": 0.98,
+    "label_changed": 0.9933333333333333,
+    "after_recognizable": 1.0
+  },
+  "fleiss_kappa": {
+    "before_label": 0.9733696295419576,
+    "after_label": 0.9738341667635771,
+    "label_changed": 0.9195557963163588,
+    "after_recognizable": 1.0
+  },
+  "n_preservation_failures": 4
+}

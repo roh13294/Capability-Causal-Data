@@ -1,0 +1,50 @@
+seed: 0
+results_dir: results
+prefer_gpu: false
+
+# Embedding-additivity validation for the finite-candidate CIC recovery theorem.
+#
+# This experiment tests whether the additive-channel assumption behind the
+# theorem is supported for the CLIP image embedding. For CLIP, logits are inner
+# products  logit_y(X) = <u(X), v_y>, so additive logits are plausible iff the
+# embedding shift caused by a shortcut is approximately input-independent:
+#     u(object + shortcut) - u(object only) ~= shortcut_direction.
+#
+# It is run on two finite-candidate shortcut families:
+#   1. the hard multi-decoy text-overlay shortcut (expected to support additivity)
+#   2. the cross-shortcut colored-symbol watermark (negative result; expected weak)
+#
+# Frozen generation policy from the main hard multi-decoy run is reused verbatim;
+# nothing is reselected or tuned on the metrics below.
+frozen_policy_dir: results/hard_multidecoy_clip_repair
+
+# A-priori decision thresholds. These are fixed BEFORE running and are NOT tuned
+# on the observed metrics. They gate the headline-eligibility booleans.
+thresholds:
+  # Same-shortcut delta clustering must exceed the shuffled-label baseline by at
+  # least this cosine margin.
+  cluster_cosine_margin: 0.10
+  # Mean ||u(neutralized) - u(clean)|| / ||u(shortcut) - u(clean)|| must be at or
+  # below this for neutralization damage to count as "small".
+  neutralization_ratio_max: 0.60
+  # Minimum repair-success rate among margin-satisfied examples for the margin
+  # diagnostic to count as predictive.
+  margin_success_min: 0.50
+  # A watermark shortcut channel counts as weak/flat if its mean shortcut-effect
+  # embedding norm is below this fraction of the text shortcut-effect norm.
+  watermark_weak_effect_fraction: 0.50
+  n_label_shuffles: 25
+
+data:
+  image_size: 224            # CLIP-native resolution
+  text_n_per_class: 12       # 4 classes * 12 = 48 misleading text examples
+  watermark_n_per_class: 12  # 4 classes * 12 = 48 misleading watermark examples
+  watermark_benchmark_seed: 5151
+
+model:
+  preferred_backend: open_clip
+  model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+  allow_pretrained_download: true
+  device: auto

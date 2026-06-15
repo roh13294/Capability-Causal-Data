@@ -1,0 +1,3 @@
+# Cross-Shortcut Generalization Figure Caption
+
+Failure-conditioned repair accuracy on a non-text colored-symbol watermark shortcut (colored_symbol_watermark) using a CIC repair/scoring policy **selected on text-overlay shortcuts and frozen** (no retuning on this shortcut family). Bars: original (pre-repair, ~0 by construction), oracle shortcut neutralization (upper bound), frozen CIC top-1 and top-3 repair, and matched random region repair (error bar = 95% CI over random draws). The frozen policy did NOT clear the transfer eligibility thresholds; shown as a negative/limiting result. This is a finite-candidate transfer test, not open-world shortcut discovery.

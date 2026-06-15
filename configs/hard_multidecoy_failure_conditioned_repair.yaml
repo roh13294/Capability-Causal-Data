@@ -1,0 +1,31 @@
+seed: 0
+results_dir: results
+prefer_gpu: false
+
+# Use the frozen, validation-selected generation and repair policies from the
+# main hard multi-decoy run. The failure-conditioned benchmark must NOT re-select
+# either policy on the held-out failure subset.
+frozen_policy_dir: results/hard_multidecoy_clip_repair
+
+# Candidate pool and failure-conditioning thresholds.
+pool_per_class: 48            # up to 4*48 = 192 screened candidates
+n_failure_target: 50         # stop when >= 50 included; report achieved n otherwise
+original_confidence_threshold: 0.50
+clean_preservation_min: 0.85
+
+# Repair evaluation budget on the included failure subset.
+max_candidates: 96
+augmentation_views: 5
+random_draws: 25             # matched random text-region baseline repeats (reduced from 100; reported)
+resume: true
+
+data:
+  image_size: 224
+
+model:
+  preferred_backend: open_clip
+  model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+  allow_pretrained_download: true
+  device: auto

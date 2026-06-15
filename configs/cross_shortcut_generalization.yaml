@@ -1,0 +1,39 @@
+seed: 0
+results_dir: results
+prefer_gpu: false
+
+# Cross-shortcut generalization test.
+#
+# The frozen, validation-selected repair/scoring policy from the text-overlay
+# hard multi-decoy run is loaded verbatim and applied, with NO retuning, to a
+# different finite-candidate shortcut family: a non-text colored-symbol
+# watermark. Thresholds and scoring weights must NOT be reselected here.
+frozen_policy_dir: results/hard_multidecoy_clip_repair
+
+# Mode A — natural cross-shortcut benchmark.
+natural_benchmark_seed: 909
+
+# Mode B — failure-conditioned cross-shortcut evaluation.
+pool_per_class: 96            # up to 4*96 = 384 screened candidates
+pool_benchmark_seed: 5151
+n_failure_target: 32         # stop when >= 32 included; report achieved n otherwise
+original_confidence_threshold: 0.50
+clean_preservation_min: 0.85
+
+# Repair / proposal budget (proposal generation only; policy stays frozen).
+max_candidates: 48
+augmentation_views: 3
+random_draws: 25             # matched random region baseline repeats (reported mean/std/95% CI)
+resume: true
+
+data:
+  image_size: 224            # CLIP-native resolution so the watermark symbol is perceptible
+  natural_n_per_class: 4     # 4 regimes * 4 classes * 4 = 64 natural examples
+
+model:
+  preferred_backend: open_clip
+  model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+  allow_pretrained_download: true
+  device: auto

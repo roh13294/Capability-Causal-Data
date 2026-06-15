@@ -1,0 +1,21 @@
+{
+  "max_clean_drop": 0.05,
+  "min_consensus_stability": 0.6666666667,
+  "objective": "clean_safe_repair",
+  "relaxed_clean_drop_constraint": false,
+  "repair_source": "consensus",
+  "score_threshold": 0.16774862559021267,
+  "validation_metrics": {
+    "abstention_rate": 0.0,
+    "balanced_score": 0.84375,
+    "clean_accuracy_after": 1.0,
+    "clean_accuracy_before": 1.0,
+    "clean_accuracy_drop": 0.0,
+    "coverage": 1.0,
+    "false_repair_rate": 0.0,
+    "min_consensus_stability": 0.6666666667,
+    "misleading_repair_accuracy": 0.84375,
+    "repair_rate": 0.28125,
+    "score_threshold": 0.16774862559021267
+  }
+}

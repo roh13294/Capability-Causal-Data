@@ -1,0 +1,30 @@
+{
+  "aligned_accuracy": null,
+  "cic_top1_accuracy": null,
+  "cic_topk_accuracy": null,
+  "cub_available": false,
+  "cub_segmentations_available": false,
+  "dataset_generated": false,
+  "finite_candidate_not_open_world": true,
+  "masks_used_for": "n/a (skipped)",
+  "matched_random_accuracy": null,
+  "misleading_accuracy": null,
+  "missing": [
+    "images.txt",
+    "image_class_labels.txt",
+    "classes.txt",
+    "bounding_boxes.txt",
+    "images/"
+  ],
+  "n_failure_conditioned": 0,
+  "n_natural": 0,
+  "nonoracle_scorer_excluded_label_group_masks_correctness": true,
+  "oracle_repair_accuracy": null,
+  "original_accuracy": null,
+  "places_available": false,
+  "regenerated_waterbirds_available": false,
+  "regenerated_waterbirds_headline_eligible": false,
+  "skip_reason": "Regenerated Waterbirds pilot skipped: CUB-200-2011 image assets not found. Missing: images.txt, image_class_labels.txt, classes.txt, bounding_boxes.txt, images/",
+  "skipped": true,
+  "waterbirds_headline_eligible": false
+}

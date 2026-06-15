@@ -1,0 +1,11 @@
+seed: 7
+results_dir: results
+sample_path: causal_reliability/data/real_text_samples.csv
+repeats: 18
+marker_strength: 10
+epochs: 140
+lr: 0.08
+regimes:
+  - confidence-solvable
+  - confident-wrong
+  - mixed

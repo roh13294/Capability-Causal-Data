@@ -28,6 +28,18 @@ indicate failure under the shifted evaluation distribution.
 
 Confidence and counterfactual stability are separable reliability signals. There exist distribution-shift regimes where confidence predicts failure and CIC adds little, and there exist regimes where confidence risk fails but CIC separates shortcut-dependent failures from stable predictions.
 
+## Lemma: Confidence-Only Insufficiency For Shortcut Reliance
+
+Setup: let `x = (c, s)`, with true label `y = g(c)`. The shortcut `s` is correlated with `y` in some environments but is not causally necessary for `y`. Let `u(f(x))` be any reliability score that depends only on the model's output probabilities on the observed input.
+
+Claim: no confidence-only metric is sufficient to detect shortcut reliance.
+
+Proof sketch: construct Model A and Model B. Model A predicts from `c`; Model B predicts from `s`. On the observed input, choose parameters so that both models output the same predicted class and the same probability vector, for example `[0.95, 0.05]` for class 0. Since `u` only sees this probability vector, it assigns the same reliability score to both models.
+
+Now intervene on the shortcut: form `x' = (c, s')`, where `s'` changes the shortcut but preserves the causal content and therefore preserves `y`. Model A remains stable because `c` is unchanged. Model B changes its prediction, margin, or probability distribution because its decision used `s`. The two models therefore differ in shortcut reliance even though every confidence-only score assigns them the same score on `x`.
+
+Conclusion: counterfactual stability provides information not contained in confidence. This does not imply that CIC detects every shortcut; it only establishes that confidence and shortcut stability are distinct reliability axes.
+
 ## Regime A: Confidence-Solvable Shift
 
 In a confidence-solvable regime, shifted failures tend to be uncertain:

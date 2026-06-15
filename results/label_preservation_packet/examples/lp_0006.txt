@@ -1,0 +1,7 @@
+Example ID: colored_digits_006
+Domain: colored_digits
+Original: Digit 6 rendered in orange.
+Counterfactual: The same digit 6 rendered in lime.
+Original reference label: 6
+Intended counterfactual reference label: 6
+Rationale: The digit identity is unchanged; only the shortcut color changes.

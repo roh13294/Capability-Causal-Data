@@ -1,0 +1,49 @@
+seed: 0
+results_dir: results
+prefer_gpu: false
+max_candidates: 96
+augmentation_views: 5
+random_draws: 100
+
+# Full benchmark-resampling audit knobs (used by --resample-benchmark-full).
+# Each audit seed draws an independent held-out benchmark instance. To keep
+# runtime bounded the matched random text-region baseline repeats are reduced
+# from 100 to full_resample_random_draws; this is reported in the audit outputs.
+full_resample_test_n_per_class: 8   # 8 -> >=32 hard misleading examples per seed; raise to 16 for n=64 if runtime allows
+full_resample_random_draws: 25
+
+generation_sweep:
+  max_policies: 16
+  harmful_text_size: [224, 280]
+  decoy_text_size: [224, 280]
+  harmful_placement: [near_object, over_object]
+  decoy_placement: [away, near_object]
+  n_decoys: [4, 5]
+  text_color:
+    - [185, 20, 24]
+    - [30, 30, 30]
+  text_opacity: [1.0]
+  text_box_background: [true]
+  repeat_harmful_word: [false, true]
+  class_set_size: [4]
+  neutral_decoy_vocabulary: [image, object, shape, figure, sample, panel, visual, mark]
+
+repair_policy:
+  objective: validation_clean_safe_repair
+  max_clean_drop: 0.05
+  min_consensus_grid:
+    - 0.6666666667
+    - 1.0
+
+data:
+  validation_n_per_class: 8
+  test_n_per_class: 8
+  image_size: 224
+
+model:
+  preferred_backend: open_clip
+  model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+  allow_pretrained_download: true
+  device: auto

@@ -1,0 +1,24 @@
+augmentation_views: 3
+clean_preservation_min: 0.85
+data:
+  image_size: 224
+  natural_n_per_class: 4
+frozen_policy_dir: results/hard_multidecoy_clip_repair
+max_candidates: 48
+model:
+  allow_pretrained_download: true
+  device: auto
+  model_name: ViT-B-32
+  preferred_backend: open_clip
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+n_failure_target: 32
+natural_benchmark_seed: 909
+original_confidence_threshold: 0.5
+pool_benchmark_seed: 5151
+pool_per_class: 96
+prefer_gpu: false
+random_draws: 25
+results_dir: results
+resume: true
+seed: 0

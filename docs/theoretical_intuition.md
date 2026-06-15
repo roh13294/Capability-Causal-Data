@@ -22,6 +22,16 @@ Suppose training makes `s` highly correlated with `y`, and the model learns `f(x
 
 Changing `s` while preserving `c` changes the prediction, so CIC is high. Confidence fails because the model is not uncertain; counterfactual stability detects that the prediction depends on an unstable shortcut feature.
 
+## Lemma: No Confidence-Only Metric Is Sufficient To Detect Shortcut Reliance
+
+Let the input be `x = (c, s)`, where `c` is causal content and `s` is a shortcut. The true label is `y = g(c)`, so `s` is not causally necessary for `y`. A model may rely on `c`, on `s`, or on both. A confidence-only metric `u(x)` depends only on the model's output probabilities at the observed input.
+
+Construct two models on the same observed example. Model A relies on the causal feature `c`. Model B relies on the shortcut feature `s`. On the observed input, both models produce the same predicted label and the same confidence. Any confidence-only metric must assign them the same reliability score.
+
+Now apply a label-preserving intervention that changes `s` while preserving `c`. Model A remains stable because the causal feature is unchanged. Model B changes prediction or loses decision support because the shortcut changed. Therefore confidence alone cannot distinguish causal reliance from shortcut reliance on this example.
+
+This is a separation argument, not a universal guarantee that CIC detects every shortcut. It shows that counterfactual stability can contain information not present in confidence.
+
 ## Conclusion
 
 CIC is not a replacement for confidence. It measures a different property: whether the prediction is stable under label-preserving shortcut changes.

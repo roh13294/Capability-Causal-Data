@@ -1,0 +1,7 @@
+Example ID: neg_002_r0
+Domain: real_text_shortcut
+Original: nan
+Counterfactual: nan
+Original reference label: 0
+Intended counterfactual reference label: 0
+Rationale: The review content is unchanged; only neutral source metadata changes.

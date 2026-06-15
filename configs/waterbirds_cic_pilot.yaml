@@ -1,0 +1,70 @@
+# Bounded Waterbirds pilot for finite-candidate CIC background-shortcut repair.
+#
+# This is OPTIONAL supporting evidence, not a replacement for the main
+# OpenCLIP text-overlay result. The pilot skips cleanly if the dataset or
+# oracle-repairable bird/background masks are unavailable. It never forces a
+# positive result; headline eligibility is gated (see PART 6 of the spec).
+seed: 0
+results_dir: results
+prefer_gpu: false
+
+data:
+  # Dataset source. "wilds" looks for an installed WILDS Waterbirds release
+  # (e.g. data/wilds/waterbirds_v1.0/metadata.csv); "local" uses a local
+  # Waterbirds-style directory. The pilot is SKIPPED (not failed) if the
+  # selected source / metadata file is absent.
+  source: wilds                      # "wilds" | "local"
+  wilds_root: data/wilds             # parent dir of <dataset>_v*/ release folders
+  wilds_dataset: waterbirds          # WILDS dataset name
+  local_root: data/waterbirds        # used when source: local
+  require_masks_for_oracle: true     # never claim oracle repair without masks/bboxes
+  # Back-compat: explicit local root (source: local). Defaults to local_root.
+  root: data/waterbirds
+  metadata_csv: null                 # defaults to <root>/metadata.csv
+  # Large data is never downloaded unless this is explicitly true.
+  allow_download: false
+  download: false                    # WILDS auto-download (only if true)
+  # If masks/bboxes are absent, optionally run a metadata-only diagnostic
+  # (original CLIP accuracy by background group). This is NOT CIC repair and
+  # is never headline-eligible.
+  run_metadata_diagnostic: true
+  image_size: 224
+  # metadata.csv column names (WILDS Waterbirds-compatible defaults).
+  image_column: img_filename
+  label_column: y                    # 0 = landbird, 1 = waterbird
+  place_column: place                # optional background/habitat label
+  split_column: split                # optional; 0=train, 1=val, 2=test
+  # Oracle-repairable bird/background isolation. A mask OR a bird bbox is
+  # required; without one the pilot skips with a clear message.
+  mask_column: mask_filename         # grayscale mask, bird pixels bright (>127)
+  mask_dir: null                     # optional path prefix for mask files
+  bbox_columns: [bbox_x0, bbox_y0, bbox_x1, bbox_y1]  # optional bird-bbox fallback
+  eval_split: test                   # which split to evaluate (falls back to all rows)
+  max_natural_examples: 200          # bound the pilot; sampled deterministically
+  min_split_examples: 4
+
+prompts:
+  # Exact zero-shot prompt set reported in the summary.
+  landbird: "a photo of a landbird"
+  waterbird: "a photo of a waterbird"
+
+intervention:
+  background_fill_gray: 0.5          # neutral gray fill value in [0,1]
+  blur_radius_frac: 0.045            # gaussian blur radius as fraction of max(H,W)
+  crop_pad_frac: 0.10                # padding around bird bbox for crop intervention
+  top_k: 3                           # CIC top-k consensus size
+
+eligibility:
+  min_failure_conditioned: 30
+  low_natural_accuracy_threshold: 0.65  # natural orig acc <= this also shows real failures
+  oracle_min_accuracy: 0.80
+  cic_beats_random_abs: 0.15
+  min_bird_preservation_accuracy: 0.70
+
+model:
+  preferred_backend: open_clip
+  model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+  allow_pretrained_download: true    # model weights only; dataset is governed by data.allow_download
+  device: auto

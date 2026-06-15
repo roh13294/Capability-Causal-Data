@@ -1,0 +1,5 @@
+results_dir: results
+seed: 7
+download_gtsrb: false
+use_synthetic_fallback: false
+n_examples: 120

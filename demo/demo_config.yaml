@@ -1,0 +1,41 @@
+# CIC demo configuration.
+#
+# This file configures ONLY the presentation demo. It does not affect any
+# experiment, benchmark metric, support gate, or results/final_report/.
+#
+# mode:
+#   mock  - deterministic, model-free stub classifier (default; safe, fast, no
+#           downloads). Mock outputs are NOT scientific evidence.
+#   real  - OpenCLIP zero-shot with real weights (set allow_download: true the
+#           first time, or pre-cache the weights). Requires open_clip_torch.
+#   auto  - try real, silently fall back to mock if weights are unavailable.
+mode: mock
+
+# Zero-shot label set used for the demo (kept small for presentation clarity).
+class_names:
+  - tabby cat
+  - golden retriever dog
+  - ceramic coffee mug
+  - printed street sign
+  - open paperback book
+  - laptop computer
+
+# Finite candidate proposal budget and determinism.
+max_candidates: 32
+seed: 0
+top_k: 5
+
+# Real-model options (ignored in mock mode).
+device: cpu
+allow_download: false
+preferred_backend: open_clip
+
+# Reliability / abstention gate thresholds (same logic as the research
+# abstention policy; surfaced here only for the demo's accept/abstain readout).
+high_confidence_threshold: 0.8
+low_stability_threshold: 0.5
+
+# Where exported demo reports (JSON + PNG) are written. This is a demo output
+# folder; the demo never writes to benchmark result folders.
+export_dir: results/demo_validation/exports
+sample_images_dir: demo/sample_images

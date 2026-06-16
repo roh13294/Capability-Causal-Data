@@ -9,6 +9,7 @@
 \usepackage{caption}
 \usepackage{xcolor}
 \usepackage{enumitem}
+\usepackage{placeins}
 \usepackage[hidelinks]{hyperref}
 
 \captionsetup{font=small,labelfont=bf}
@@ -31,10 +32,36 @@ Shortcut-Dependent Predictions in Pretrained Vision--Language Models}
 \date{\today}
 
 \begin{document}
-\maketitle
 
+% =====================================================================
+% Title page (PDF page 1). Per STS rules the title page and the abstract
+% page are NOT counted toward the 20-page content limit, so both are left
+% unnumbered and the page counter is reset to 1 where counted content begins.
+% =====================================================================
+\begin{titlepage}
+\centering
+\thispagestyle{empty}
+\vspace*{\fill}
+{\LARGE\bfseries Beyond Confidence: Counterfactual Stability as a\\[0.35em]
+Second Axis of Neural Network Reliability\par}
+\vspace{1.4em}
+{\large A Finite-Candidate Intervention Framework for Detecting and\\
+Repairing Shortcut-Dependent Predictions in Pretrained\\
+Vision--Language Models\par}
+\vspace{3em}
+{\large Rohan Nagaram\par}
+\vspace{1.2em}
+{\large \today\par}
+\vspace*{\fill}
+\end{titlepage}
+
+% =====================================================================
+% Abstract alone on PDF page 2 (not counted toward the page limit).
+% =====================================================================
+\clearpage
+\thispagestyle{empty}
 \begin{abstract}
-\noindent
+\noindent\small
 Confidence measures how sure a model is, but not whether its certainty rests on
 causal evidence. This paper proposes \emph{counterfactual stability} as a second
 reliability axis and operationalizes it through \emph{Counterfactual Instability
@@ -79,6 +106,13 @@ input-independent embedding-additivity assumption fails for OpenCLIP text overla
 --- the per-image shift is object-entangled --- but the weaker per-input
 class-balance premise the recovery theorem actually needs is supported.
 \end{abstract}
+
+% =====================================================================
+% Counted content begins here (PDF page 3). Reset the visible folio to 1
+% so the counted content pages read 1..N for the reviewer.
+% =====================================================================
+\clearpage
+\setcounter{page}{1}
 
 % =====================================================================
 \section{Introduction}
@@ -403,7 +437,7 @@ four were \texttt{repair\_eligible}. All four models were evaluated on the
 \emph{same} larger resampled benchmark instance (one shared benchmark hash) for a
 fair cross-model comparison; that benchmark hash differs from the $n=32$ headline
 benchmark, so these values are a separate larger-$n$ replication rather than a
-cell-for-cell restatement of the headline. The test suite passes ($382$ tests).
+cell-for-cell restatement of the headline. The full test suite passes.
 
 \begin{table}[t]
 \centering
@@ -991,8 +1025,9 @@ define failure subsets, oracle bounds, and localization metrics --- and a fallba
 backend is blocked from headline eligibility (\texttt{headline\_eligible} is gated on
 pretrained loading, leakage checks, low original accuracy, beating matched random, and
 clean preservation). Paper numbers come from regenerated artifacts (chiefly
-\texttt{final\_key\_numbers.json}); the test suite passes \textbf{382/382}
-(\texttt{python3 -m pytest}) with tests for no-oracle-leakage, generalization/theory
+\texttt{final\_key\_numbers.json}); the full test suite passes
+(\texttt{python3 -m pytest}; current pytest count recorded in the reproducibility logs)
+with tests for no-oracle-leakage, generalization/theory
 gating, class-balance, and final-report caveats, and $24/24$ negative controls pass. An
 earlier exploratory headline ($0.219\to0.875$) under a prior prediction path is
 \emph{not} used; the authoritative artifacts report $0.250\to0.750$ vs.\ matched random
@@ -1133,6 +1168,11 @@ Assumption-free open-world discovery; a semantic-correctness guarantee \\
 \end{tabular}
 \end{table}
 
+% Force the frozen generalization map (and any other pending float) to be
+% placed here, before the Conclusion and the bibliography. Guarantees no
+% table floats past \bibliography.
+\FloatBarrier
+
 % =====================================================================
 \section{Conclusion}\label{sec:conclusion}
 % =====================================================================
@@ -1169,6 +1209,10 @@ discovery.
 \noindent\emph{Full per-experiment artifacts, extended tables, and reproducibility
 files are indexed in the accompanying artifact index
 (\texttt{FINAL\_ARTIFACT\_INDEX.md}).}
+
+% Flush every remaining float before the bibliography so that the
+% bibliography is the final content of the PDF (no table/figure after it).
+\clearpage
 
 \bibliographystyle{plain}
 \bibliography{references}

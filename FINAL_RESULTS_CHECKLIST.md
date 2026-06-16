@@ -8,7 +8,7 @@
 
 ## Current Final Validation State
 
-- **Full test suite:** 382 passed (`python3 -m pytest`).
+- **Full test suite:** passes (`python3 -m pytest`); the current pytest count is recorded in the reproducibility logs / final audit output rather than hard-coded here. The repository's negative controls pass.
 - **Primary headline (unchanged):** text-overlay hard multi-decoy, misleading accuracy
   0.250 → 0.750 vs. 0.331 matched random text-region repair, clean-safe accuracy drop 0.010.
   Source: `results/final_report/final_key_numbers.json`.
@@ -35,7 +35,7 @@
 
 > **Historical, phase-specific snapshot — NOT the current final validation state.** The
 > "42 tests passed" count below reflects an earlier phase-7 run and is superseded by the
-> 382-test current state above. Retained only for historical context.
+> current full test suite above. Retained only for historical context.
 
 ## Commands Used
 
@@ -48,7 +48,7 @@ The direct `pytest` executable was not on PATH, so tests were run with `python3 
 
 - Phase 7 validation/regeneration command: passed.
 - Full test suite: passed, 42 tests passed, 16 warnings. *(Historical phase-7 count;
-  current suite is 382 passed — see Current Final Validation State above.)*
+  the current full suite passes — see Current Final Validation State above.)*
 
 ## Seed Counts
 

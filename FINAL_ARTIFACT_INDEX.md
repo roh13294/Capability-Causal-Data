@@ -47,7 +47,7 @@ This does not solve open-world shortcut discovery. The method searches a finite 
 
 ## Scale and Multi-Model Replication Audit (Supporting)
 
-Supporting evidence only; this **does not** replace the frozen primary headline above (ViT-B-32 / laion2b_s34b_b79k at n=32: misleading 0.250 → CIC top-1 0.750 vs. 0.331 matched random, clean-safe drop 0.010), which is left unchanged. A scale-and-multi-model replication audit re-ran the hard multi-decoy text-overlay benchmark at n_per_condition = 128 across four real pretrained OpenCLIP backbone/checkpoint pairs. All 4/4 model/checkpoint pairs loaded (0 skipped, no fake backend) and all four were `repair_eligible`; the test suite passes (382 tests). All four models were evaluated on the **same** larger resampled benchmark instance (one shared benchmark hash) for a fair cross-model comparison, and this benchmark hash differs from the n=32 headline benchmark, so these numbers are a separate larger-n replication and not a cell-for-cell restatement of the headline.
+Supporting evidence only; this **does not** replace the frozen primary headline above (ViT-B-32 / laion2b_s34b_b79k at n=32: misleading 0.250 → CIC top-1 0.750 vs. 0.331 matched random, clean-safe drop 0.010), which is left unchanged. A scale-and-multi-model replication audit re-ran the hard multi-decoy text-overlay benchmark at n_per_condition = 128 across four real pretrained OpenCLIP backbone/checkpoint pairs. All 4/4 model/checkpoint pairs loaded (0 skipped, no fake backend) and all four were `repair_eligible`; the full test suite passes. All four models were evaluated on the **same** larger resampled benchmark instance (one shared benchmark hash) for a fair cross-model comparison, and this benchmark hash differs from the n=32 headline benchmark, so these numbers are a separate larger-n replication and not a cell-for-cell restatement of the headline.
 
 | Model | Pretrained tag | Original misleading | CIC top-1 | Matched random | CIC − random gap | Clean-safe drop | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -253,7 +253,7 @@ so no artifact information is lost. Headline metrics are unchanged.
 | Second shortcut family (semantic-decoy icon; supporting, not headline) | yes (n=64 & n=128 both 8/8 gates) |
 | — earlier flat visual-decoy pilot retained as boundary evidence | yes (1 gate fails) |
 | Spatial-resolution & causal-intervention audit (diagnostic; not exact localization) | yes (pooled n=210; coarse-intervention framing) |
-| Test suite | 382/382 pass |
+| Test suite | full suite passes (current pytest count in reproducibility logs / final audit output) |
 | Negative controls | 24/24 pass |
 | Human label-preservation study (3 annotators, 100 pairs) | yes |
 | — majority-vote label preserved / recognizable | 96/100, 97/100 |

@@ -13,3 +13,4 @@ __pycache__/
 .DS_Store
 
 data/coco_text_cic/raw/
+results/demo_validation/exports/

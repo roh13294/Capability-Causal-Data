@@ -1,0 +1,80 @@
+# Spatial-resolution and causal-intervention audit.
+#
+# Purpose: separate *exact box precision* (IoU with the oracle shortcut box)
+# from *causal-intervention usefulness* (does the selected region cover the
+# shortcut evidence, preserve causal content, and repair the prediction?).
+#
+# This audit reads EXISTING benchmark artifacts only. It does not re-run any
+# model and does not change headline model metrics. It makes no claim of exact
+# localization, segmentation, open-world discovery, or general robustness.
+
+results_dir: results
+output_subdir: spatial_resolution_audit
+
+# Image geometry used to normalise area fractions. All current text-overlay
+# benchmarks render at 224x224.
+image_size: 224
+
+# Default method names (per-benchmark overrides allowed below). The selected
+# CIC region is the top-1 method's selected region; top-3 and clean-safe are
+# read for repair-by-bucket reporting when present.
+selected_method: nonoracle_cic_top1_repair
+top3_method: nonoracle_cic_top3_repair
+clean_safe_method: nonoracle_cic_clean_safe_repair
+oracle_method: oracle_harmful_text_neutralization
+
+# Default column names (per-benchmark overrides allowed below).
+shortcut_iou_column: selected_harmful_iou   # IoU of selected region vs oracle shortcut box
+object_iou_column: selected_object_iou       # IoU of selected region vs causal object box
+
+# IoU thresholds for hit@IoU reporting.
+iou_thresholds: [0.1, 0.2, 0.3, 0.4, 0.5]
+
+# Repair-by-localization buckets (lower-inclusive, upper-exclusive; last is >=).
+iou_buckets:
+  - [0.0, 0.1]
+  - [0.1, 0.3]
+  - [0.3, 0.5]
+  - [0.5, 1.01]
+
+# Only examples that carry a known oracle shortcut box contribute to
+# localization / coverage metrics. These are the misleading-overlay regimes.
+shortcut_regimes:
+  - hard_multi_decoy_misleading
+
+# Benchmarks to audit. Each entry points at artifacts already on disk; missing
+# benchmarks are skipped with a logged note rather than fabricated. Per-entry
+# keys override the global defaults above.
+benchmarks:
+  - name: hard_multidecoy
+    dir: hard_multidecoy_clip_repair
+    certificates: hard_multidecoy_repair_certificates.csv
+    rankings: hard_multidecoy_candidate_rankings.csv   # supplies oracle box + scored candidates
+  - name: failure_conditioned
+    dir: hard_multidecoy_failure_conditioned
+    certificates: failure_conditioned_certificates.csv
+    rankings_cache: example_eval_cache   # per-example rankings (oracle box per example)
+  - name: semantic_decoy_n128
+    dir: semantic_decoy_scale_n128
+    certificates: semantic_decoy_pilot_certificates.csv
+    selected_method: cic_top1_region_repair
+    top3_method: cic_top3_consensus_repair
+    clean_safe_method: cic_clean_safe_repair
+    oracle_method: oracle_decoy_neutralization
+    shortcut_iou_column: top1_decoy_iou_eval_only   # IoU vs decoy; no oracle box on disk
+    object_iou_column: null                          # no object box -> object overlap n/a
+    shortcut_regimes: [misleading_decoy]
+
+# Optional refinement diagnostic. Disabled-by-default knobs are explicit so the
+# refinement selection can be audited for oracle leakage.
+refinement:
+  enabled: true
+  shrink_fractions: [0.10, 0.20]   # 10% and 20% shrink toward the box centre
+  shifts: [up, down, left, right]
+  shift_fraction: 0.10             # shift step as a fraction of box size
+  split_2x2: true                  # also consider the four 2x2 sub-boxes
+  # Non-oracle proxy weights. The proxy uses only pixels (area), candidate
+  # boxes, and model-derived candidate scores -- never the oracle box, the true
+  # label, or repair correctness.
+  area_weight: 0.25                # penalise larger regions (prefer tighter)
+  consensus_weight: 1.0            # reward overlap with high-score candidates

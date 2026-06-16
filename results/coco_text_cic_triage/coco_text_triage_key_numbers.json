@@ -1,0 +1,58 @@
+{
+  "n_metadata_rows": 500,
+  "real_pretrained_model_loaded": true,
+  "fake_backend": false,
+  "backend": "open_clip",
+  "model_name": "ViT-B-32",
+  "pretrained_loaded": true,
+  "original_clip_accuracy": 0.76,
+  "high_confidence_failure_rate": 0.118,
+  "n_original_failures": 120,
+  "n_directional_failures": 57,
+  "n_strict_oracle_repairable_failures": 39,
+  "n_oracle_top5_or_pairwise_recovery": 56,
+  "oracle_strict_top1_rate": 0.3157894736842105,
+  "oracle_strict_top3_rate": 0.8596491228070176,
+  "oracle_strict_top5_rate": 0.9649122807017544,
+  "oracle_target_prob_improvement_rate": 0.49166666666666664,
+  "oracle_text_distractor_decrease_rate": 0.5916666666666667,
+  "n_clean_subset": 219,
+  "min_directional_failures": 50,
+  "min_strict_failures": 30,
+  "min_oracle_top5_or_pairwise_recovery": 50,
+  "min_clean_examples": 30,
+  "oracle_operators": [
+    "gray_fill",
+    "expanded_gray_fill_1.25",
+    "gaussian_blur",
+    "expanded_blur_1.25"
+  ],
+  "ran_open_proposal_cic": false,
+  "coco_text_ready_for_full_cic": true,
+  "gate_failed_reasons": [],
+  "strongest_categories": [
+    "car",
+    "truck",
+    "laptop",
+    "pizza",
+    "cup"
+  ],
+  "weakest_categories": [
+    "apple",
+    "bicycle",
+    "bird",
+    "boat",
+    "bus"
+  ],
+  "examples_to_inspect": [
+    "7:truck (op=expanded_gray_fill_1.25)",
+    "29:pizza (op=gray_fill)",
+    "56:cow (op=gaussian_blur)",
+    "61:car (op=gaussian_blur)",
+    "69:truck (op=expanded_gray_fill_1.25)",
+    "76:orange (op=gaussian_blur)",
+    "77:car (op=expanded_blur_1.25)",
+    "88:car (op=expanded_blur_1.25)"
+  ],
+  "n_contact_sheet_images": 50
+}

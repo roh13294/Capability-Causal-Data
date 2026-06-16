@@ -1,0 +1,42 @@
+data:
+  coco_text:
+    image_root: data/coco_text/images
+    metadata_json: data/coco_text/natural_text_open_proposal.json
+  image_size: 224
+  local:
+    metadata_csv: data/natural_text_images/metadata.csv
+    root: data/natural_text_images
+  mode: local
+  open_images:
+    image_root: data/open_images/images
+    metadata_json: data/open_images/natural_text_open_proposal.json
+  split: test
+  synthetic:
+    n_images: 36
+    seed: 0
+    size: 96
+  textocr:
+    image_root: data/textocr/images
+    metadata_json: data/textocr/natural_text_open_proposal.json
+enable_object_box_family: false
+grid_scales:
+- 0.18
+- 0.3
+- 0.45
+high_confidence_threshold: 0.7
+max_candidates: 64
+max_content_preservation_drop: 0.1
+min_cic_random_gap: 0.15
+min_images: 30
+model:
+  allow_pretrained_download: false
+  device: auto
+  model_name: ViT-B-32
+  preferred_backend: open_clip
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+n_example_visualizations: 6
+output_subdir: natural_text_open_proposal_cic
+prefer_gpu: false
+results_dir: results
+seed: 0

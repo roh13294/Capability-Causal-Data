@@ -148,7 +148,7 @@ Full benchmark-resampling audit artifacts are available in `results/hard_multide
 
 ##### Scale and Multi-Model Replication Audit
 
-Supporting evidence only. This audit does NOT replace the frozen primary headline (ViT-B-32 / laion2b_s34b_b79k at n=32 per condition), which is left unchanged. At n_per_condition = 128, 4/4 real pretrained OpenCLIP model/checkpoint pairs loaded (0 skipped), and all 4 are repair_eligible. Test suite: 186 passed.
+Supporting evidence only. This audit does NOT replace the frozen primary headline (ViT-B-32 / laion2b_s34b_b79k at n=32 per condition), which is left unchanged. At n_per_condition = 128, 4/4 real pretrained OpenCLIP model/checkpoint pairs loaded (0 skipped), and all 4 are repair_eligible. Test suite: 213 passed.
 
 All four models were evaluated on the same larger resampled benchmark instance (benchmark hash `b896599c8b91c3bf87338c5cd5e0592b5f16a2dafa25632d4c5868ff7269bd41`) for a fair cross-model comparison. This benchmark hash differs from the n=32 headline benchmark, so these numbers are a separate, larger-n replication and are not directly comparable cell-for-cell to the frozen n=32 headline.
 
@@ -174,6 +174,18 @@ CIC also succeeds on a second controlled finite-candidate shortcut family beyond
 The earlier flat visual-decoy pilot was not failure-rich enough (misleading accuracy ~0.58 exceeded the <= 0.40 failure gate) and is retained as boundary evidence; the semantic-decoy icon benchmark was the final pre-specified second-family attempt and passed all gates.
 
 Artifacts: `results/semantic_decoy_pilot/` (n=64) and `results/semantic_decoy_scale_n128/` (n=128); boundary evidence in `results/visual_decoy_pilot/`.
+
+##### Spatial-Resolution and Causal-Intervention Audit
+
+Supporting diagnostic only; this reads existing benchmark artifacts and does not re-run any model or change a headline metric. It separates exact box precision (IoU with the oracle shortcut box) from causal-intervention usefulness (shortcut coverage, intervention bluntness, and repair-by-IoU) to address the low exact-IoU criticism without claiming exact localization.
+
+Pooled over 210 shortcut examples from the hard multi-decoy, failure-conditioned, and semantic-decoy (n=128) benchmarks, CIC-selected regions had median IoU 0.393 with the oracle shortcut box and reached IoU >= 0.5 in 0.433 of cases. However, they intersected the shortcut in 0.900 of cases and covered at least half of the shortcut box in 0.768 of cases (>= 0.8 coverage in 0.707; median coverage 0.875). Selected regions were coarse, with median area 0.211 of the image and about 2.099x the oracle shortcut box area, while preserving causal content (median object IoU 0.196 where object boxes are available).
+
+Repair tracks coarse overlap rather than exact boxes: pooled CIC top-1 repair is 0.776 and rises sharply by IoU bucket (0.26 at IoU < 0.1, 0.92 for 0.3 <= IoU < 0.5, and 1.00 for IoU >= 0.5), while clean-safe repair stays at 0.805. A non-oracle refinement diagnostic (geometric shrink/split/shift variants re-scored using only pixels, candidate boxes, and model probabilities — never the oracle box, label, or correctness) did NOT improve median IoU or the IoU >= 0.5 rate and is reported honestly as such.
+
+CIC should be understood as a coarse causal-intervention method rather than an exact localization or segmentation method. Exact localization remains a limitation; this audit does not claim exact localization, segmentation quality, spatial grounding solved, open-world discovery, or general robustness. The semantic-decoy benchmark ships no oracle shortcut box or object box, so its coverage and object-overlap metrics are reported as n/a rather than fabricated.
+
+Artifacts: `results/spatial_resolution_audit/spatial_resolution_summary.md`, `spatial_resolution_key_numbers.json`, `spatial_resolution_metrics.csv`, `spatial_resolution_by_bucket.csv`, `spatial_resolution_plot.png`.
 
 ##### Failure-Conditioned Hard Multi-Decoy Repair Evaluation
 
@@ -239,7 +251,7 @@ This repair extension does not show CIC dramatically repairs all failures, domin
 
 Traffic-sign status: unavailable. Dataset: GTSRB. CIC AUROC: NA.
 
-This experiment is a safety-critical-inspired shortcut audit. It does not validate deployment in autonomous vehicles.
+This experiment is a safety-critical-inspired shortcut evaluation. It does not validate deployment in autonomous vehicles.
 
 Occlusion sanity check mean shortcut attention ratio: 0.767.
 
@@ -277,8 +289,8 @@ What remains unresolved: intervention validity still requires task knowledge, fi
 | Single-overlay non-oracle CLIP shortcut localization and repair | Whether finite candidate regions can be ranked without the overlay bbox and then used for repair                      | Top-1/top-3 localization at IoU >= 0.3: 0.094 / 0.156; headline eligible: `False`                                       | Promising but not headline evidence because the matched/random patch baseline can be competitive                                                    |
 | First multi-decoy CLIP repair                                   | Whether non-oracle scoring survives multiple text decoys                                                              | Original misleading accuracy 0.906; top-1 CIC repair 0.719; random text repair 0.892                                    | Not a true shortcut-failure benchmark because original misleading accuracy was high                                                                 |
 | Hard multi-decoy CLIP shortcut localization                     | Whether finite candidate text-region scoring can repair a held-out hard misleading-overlay failure benchmark          | misleading accuracy 0.250 to 0.750                                                                                      | Main headline result: non-oracle finite-candidate repair evidence, with coarse localization and explicit matched random controls                    |
-| Traffic sign shortcut validation                                | Whether a safety-critical-inspired sign shortcut audit is available without medical or deployment claims              | Status: unavailable; CIC AUROC NA                                                                                       | Traffic-sign evidence is counted only when explicitly available; unavailable runs do not fabricate validation                                       |
-| Practitioner CIC audit workflow                                 | Whether users can score examples and assign reliability quadrants from supplied interventions                         | Simple API and CLI demo write certificates, report, and reliability-plane figures                                       | CIC is usable for hypothesized shortcut audits, not arbitrary turnkey deployment                                                                    |
+| Traffic sign shortcut validation                                | Whether a safety-critical-inspired sign shortcut evaluation is available without medical or deployment claims         | Status: unavailable; CIC AUROC NA                                                                                       | Traffic-sign evidence is counted only when explicitly available; unavailable runs do not fabricate validation                                       |
+| Practitioner CIC audit workflow                                 | Whether users can score examples and assign reliability quadrants from supplied interventions                         | Simple API and CLI demo write certificates, report, and reliability-plane figures                                       | CIC is usable for hypothesized shortcut interventions, not arbitrary turnkey deployment                                                             |
 
 ## 9/10 Category Defense Summary
 
@@ -288,7 +300,7 @@ What remains unresolved: intervention validity still requires task knowledge, fi
 | Technical difficulty    | Benchmarks are controlled.    | CLIP, real text shortcut benchmark, baseline suite, held-out discovery, audit workflow.                                             | No large generative counterfactual engine.                                                                          | Substantial multi-domain system and evaluation.                                                |
 | Clarity                 | Claim boundaries could blur.  | Final claim, failure modes, audit wording, and theorem-style separation are explicit.                                               | CIC terminology still requires careful reading.                                                                     | The project repeatedly distinguishes uncertainty, shortcut stability, and discovery.           |
 | Experiments             | Limited real-world tasks.     | CLIP plus real text benchmark, baselines, negative controls, human validation support, and random augmentation failure stress test. | Not a 10-dataset benchmark; human validation sample size is limited to collected responses.                         | Strong breadth for STS with careful controls.                                                  |
-| Real-world significance | Requires candidate shortcuts. | Practitioner audit API, CLIP, text benchmark, finite-candidate discovery, and traffic-sign status: unavailable.                     | Not fully automatic deployment; traffic-sign fallback/unavailable results are not real-world deployment validation. | Directly usable for hypothesized shortcut audits.                                              |
+| Real-world significance | Requires candidate shortcuts. | Practitioner audit API, CLIP, text benchmark, finite-candidate discovery, and traffic-sign status: unavailable.                     | Not fully automatic deployment; traffic-sign fallback/unavailable results are not real-world deployment validation. | Directly usable for hypothesized shortcut interventions.                                       |
 | Limitations             | Risk of overclaiming.         | Negative controls, when-CIC-fails doc, no-fabricated-human-results analyzer behavior, and explicit simulated-shortcut caveats.      | Intervention validity still requires domain judgment; simulated shortcut limitations remain.                        | The project makes limits part of the evidence hierarchy.                                       |
 
 ## Theory and Mechanism Validation

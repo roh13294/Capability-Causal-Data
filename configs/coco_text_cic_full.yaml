@@ -1,0 +1,86 @@
+# Full shortcut-agnostic proposal-based CIC on the COCO-Text dataset-backed benchmark.
+#
+# Runs the open-candidate intervention search (grid / connected-component /
+# high-contrast / edge-dense proposals + a SEPARATELY-reported OCR/text-box
+# proposal family) over the verified COCO-Text subsets and tests whether
+# proposal-based CIC beats matched random proposals on real natural images with
+# real scene text.
+#
+# Writes ONLY under results/coco_text_cic_full/. Never modifies any final-report
+# headline metric, the curated natural-text Round-1 artifacts, or the COCO-Text
+# triage artifacts. open_world_claim_allowed stays False (enforced in code).
+
+seed: 0
+prefer_gpu: false
+results_dir: results
+output_subdir: coco_text_cic_full
+
+# Which subsets to score in one pass. Clean ids are always added so content
+# preservation can be computed. "all_500" makes the eval set the full sample.
+eval_subsets:
+  - all_500
+  - directional_57
+  - strict_39
+
+# Open-proposal generation budget.
+max_candidates: 48
+grid_scales: [0.18, 0.30, 0.45]
+predict_batch_size: 64
+high_confidence_threshold: 0.7
+prob_improve_eps: 0.01
+
+# Eval-only oracle text-box operators (global, label-free). The per-image best is
+# the upper bound; best_global_operator is reported separately (default vs best).
+oracle_operators:
+  - gray_fill
+  - expanded_gray_fill_1.25
+  - gaussian_blur
+  - expanded_blur_1.25
+best_global_operator: expanded_gray_fill_1.25
+
+# Number of before/after visualizations per category (success / cic-failure).
+n_example_visualizations: 4
+
+# Whether any content-preservation drop above max_content_drop is separately
+# documented (lets the strict gate pass with a documented drop).
+content_preservation_documented: false
+max_content_drop: 0.15
+ocr_material_help_delta: 0.05
+
+# Strict-support gate thresholds (strict oracle-repairable subset).
+strict_min_n: 30
+strict_min_oracle_repair: 0.70
+strict_min_oracle_recovery: 0.80
+strict_min_cic_random_gap: 0.15
+strict_min_text_overlap: 0.60
+
+# Directional-support gate thresholds (directional subset).
+directional_min_failures: 50
+directional_min_oracle_prob_improve: 0.80
+directional_min_cic_prob_gap: 0.10
+directional_min_cic_distractor_gap: 0.10
+directional_min_text_overlap: 0.60
+
+# Triage artifacts that define the verified subsets and the clean subset.
+triage:
+  dir: results/coco_text_cic_triage
+  directional_csv: coco_text_verified_directional_failures.csv
+  strict_csv: coco_text_verified_oracle_repairable_failures.csv
+  clean_csv: coco_text_clean_subset.csv
+
+# Data loading: local folder mode over the curated COCO-Text metadata CSV.
+data:
+  root: data/coco_text_cic
+  metadata_csv: data/coco_text_cic/metadata.csv
+  image_size: 224
+  split: test
+
+# Real pretrained OpenCLIP is required. A `fake` backend is never treated as
+# evidence and forces both support gates to False.
+model:
+  preferred_backend: open_clip
+  model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+  allow_pretrained_download: false
+  device: auto

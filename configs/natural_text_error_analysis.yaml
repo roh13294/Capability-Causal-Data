@@ -1,0 +1,40 @@
+# Error-analysis & directional-metric pass for the natural-text verified failures.
+#
+# Diagnostic companion to natural_text_verified_failure_eval. Writes only new
+# files under results/natural_text_verified_failure_eval/. The strict support
+# gate is recomputed and reported but never loosened; open_world_claim_allowed
+# stays false. A new diagnostic flag natural_text_directional_evidence is added.
+
+seed: 0
+prefer_gpu: false
+results_dir: results
+verified_output_subdir: natural_text_verified_failure_eval
+
+# Candidate proposal settings (same leakage-free open-proposal pipeline).
+max_candidates: 64
+grid_scales: [0.18, 0.30, 0.45]
+enable_object_box_family: false
+
+# Example-level thresholds.
+high_confidence_threshold: 0.7
+
+# Strict gate thresholds (unchanged; reported, not loosened).
+min_verified_failures: 20
+min_oracle_repair_rate: 0.70
+min_cic_random_gap: 0.15
+
+# Data loading: the human-verified curated annotation set.
+data:
+  image_size: 224
+  split: test
+  verified:
+    root: data/natural_text_images
+    annotations_csv: data/natural_text_images/verified_annotations.csv
+
+model:
+  preferred_backend: open_clip
+  model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+  allow_pretrained_download: false
+  device: auto

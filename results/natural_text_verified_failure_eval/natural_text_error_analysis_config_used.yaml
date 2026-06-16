@@ -1,0 +1,27 @@
+data:
+  image_size: 224
+  split: test
+  verified:
+    annotations_csv: data/natural_text_images/verified_annotations.csv
+    root: data/natural_text_images
+enable_object_box_family: false
+grid_scales:
+- 0.18
+- 0.3
+- 0.45
+high_confidence_threshold: 0.7
+max_candidates: 64
+min_cic_random_gap: 0.15
+min_oracle_repair_rate: 0.7
+min_verified_failures: 20
+model:
+  allow_pretrained_download: false
+  device: auto
+  model_name: ViT-B-32
+  preferred_backend: open_clip
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+prefer_gpu: false
+results_dir: results
+seed: 0
+verified_output_subdir: natural_text_verified_failure_eval

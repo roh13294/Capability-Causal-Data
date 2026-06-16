@@ -1,0 +1,46 @@
+clean:
+  dominant_object_area_frac: 0.1
+  max_object_boxes: 3
+  max_target_area_frac: 0.8
+  max_text_area_frac: 0.5
+  max_text_boxes: 5
+  max_text_object_iou: 0.3
+  min_target_area_frac: 0.05
+  min_text_area_frac: 0.003
+  require_single_dominant: true
+data:
+  image_size: 224
+  metadata_csv: data/coco_text_cic/metadata.csv
+  root: data/coco_text_cic
+  split: test
+high_confidence_threshold: 0.7
+max_images: null
+max_object_boxes: 8
+max_target_area_frac: 0.9
+max_text_boxes: 12
+max_text_object_iou: 0.5
+min_clean_examples: 30
+min_directional_failures: 50
+min_oracle_top5_or_pairwise_recovery: 50
+min_strict_failures: 30
+min_target_area_frac: 0.03
+model:
+  allow_pretrained_download: false
+  device: auto
+  model_name: ViT-B-32
+  preferred_backend: open_clip
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+n_contact_sheet: 50
+oracle_operators:
+- gray_fill
+- expanded_gray_fill_1.25
+- gaussian_blur
+- expanded_blur_1.25
+oracle_top_k: 5
+output_subdir: coco_text_cic_triage
+prefer_gpu: false
+prob_improve_eps: 0.01
+results_dir: results
+seed: 0
+strong_pairwise_delta: 0.15

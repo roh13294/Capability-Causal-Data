@@ -1,0 +1,70 @@
+{
+  "total_images": 50,
+  "include_yes_images": 37,
+  "n_evaluated": 37,
+  "real_pretrained_model_loaded": true,
+  "fake_backend": false,
+  "original_clip_accuracy": 0.10810810810810811,
+  "high_confidence_failure_rate": 0.7837837837837838,
+  "n_verified_text_driven_failures": 29,
+  "oracle_text_box_repair_accuracy": 0.3103448275862069,
+  "oracle_text_box_repair_or_improve_rate": 0.9655172413793104,
+  "cic_top1_repair_accuracy": 0.2413793103448276,
+  "cic_top3_repair_accuracy": 0.20689655172413793,
+  "matched_random_proposal_repair_accuracy": 0.13793103448275862,
+  "largest_region_repair_accuracy": 0.1724137931034483,
+  "ocr_text_box_proposal_repair_accuracy": 0.23076923076923078,
+  "cic_random_gap": 0.10344827586206898,
+  "content_preservation_rate": 0.25,
+  "content_preservation_drop": 0.75,
+  "selected_overlaps_text_box_rate": 0.7241379310344828,
+  "selected_overlaps_object_box_rate": 0.3103448275862069,
+  "mean_selected_area_fraction": 0.07049324309465164,
+  "backend": "open_clip",
+  "model_name": "ViT-B-32",
+  "pretrained_loaded": true,
+  "candidate_families_present": [
+    "connected_component",
+    "edge_dense",
+    "grid_patch",
+    "high_contrast",
+    "ocr_text_box",
+    "random_patch"
+  ],
+  "non_ocr_family_present": true,
+  "no_oracle_leakage": true,
+  "min_verified_failures": 20,
+  "min_oracle_repair_rate": 0.7,
+  "min_cic_random_gap": 0.15,
+  "max_content_preservation_drop": 0.1,
+  "natural_text_supported": false,
+  "open_proposal_supported": false,
+  "failed_gate_reasons": [
+    "CIC top-1 does not beat matched random by >= 0.15 on verified failures (gap=0.103)",
+    "content-preservation drop 0.750 > 0.10 (and not clearly explained)"
+  ],
+  "open_world_claim_allowed": false,
+  "examples_to_inspect": [
+    "3:headphones",
+    "12:chip bag",
+    "15:sports drink bottle",
+    "30:milk carton",
+    "35:jacket",
+    "36:soda bottle",
+    "45:toothpaste box"
+  ],
+  "headline": "natural-text verified failure pilot remains unsupported",
+  "preferred_wording": [
+    "shortcut-agnostic proposal-based CIC",
+    "open-candidate intervention search",
+    "natural-image validation",
+    "does not require a pre-specified shortcut family, but still depends on candidate region proposals"
+  ],
+  "forbidden_wording": [
+    "fully open-world shortcut discovery",
+    "solves shortcut discovery",
+    "general robustness",
+    "universal repair",
+    "deployment-ready"
+  ]
+}

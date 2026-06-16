@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Natural-Text Dataset Annotation Tool</title>
+<style>
+  :root { --bg:#1e1f24; --panel:#2a2c33; --accent:#4f9dff; --text:#e6e6e6; --muted:#9aa0aa; --ok:#4caf50; --warn:#ff9800; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--text); }
+  header { padding:8px 14px; background:var(--panel); display:flex; align-items:center; gap:14px; flex-wrap:wrap; border-bottom:1px solid #000; position:sticky; top:0; z-index:10; }
+  header h1 { font-size:15px; margin:0; }
+  .layout { display:flex; gap:14px; padding:14px; align-items:flex-start; }
+  .canvas-wrap { background:var(--panel); padding:10px; border-radius:6px; }
+  #stage { position:relative; display:inline-block; line-height:0; cursor:crosshair; }
+  #img { display:block; max-width:70vw; max-height:78vh; user-select:none; -webkit-user-drag:none; }
+  #overlay { position:absolute; left:0; top:0; }
+  .side { width:380px; flex:0 0 380px; display:flex; flex-direction:column; gap:10px; }
+  .card { background:var(--panel); border-radius:6px; padding:10px 12px; }
+  .card h2 { font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 8px; }
+  label.field { display:block; font-size:12px; color:var(--muted); margin:6px 0 2px; }
+  input[type=text], textarea, select { width:100%; background:#1b1c21; color:var(--text); border:1px solid #3a3d45; border-radius:4px; padding:6px 7px; font-size:13px; font-family:inherit; }
+  textarea { resize:vertical; min-height:48px; }
+  .row { display:flex; gap:6px; flex-wrap:wrap; }
+  button { background:#3a3d45; color:var(--text); border:1px solid #4a4d55; border-radius:4px; padding:6px 10px; font-size:13px; cursor:pointer; }
+  button:hover { background:#474a53; }
+  button.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  button.danger { background:#5a2a2a; border-color:#7a3a3a; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .pill { font-size:11px; padding:2px 7px; border-radius:10px; background:#3a3d45; }
+  .boxlist { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; }
+  .boxrow { display:flex; align-items:center; gap:6px; padding:3px 0; border-bottom:1px solid #353841; }
+  .boxrow .coords { flex:1; word-break:break-all; }
+  .swatch { width:12px; height:12px; border-radius:2px; flex:0 0 12px; }
+  .text-swatch { background:#ff5a5a; }
+  .obj-swatch { background:#4f9dff; }
+  .seg { display:flex; gap:0; }
+  .seg button { border-radius:0; }
+  .seg button:first-child { border-radius:4px 0 0 4px; }
+  .seg button:last-child { border-radius:0 4px 4px 0; }
+  .small { font-size:11px; color:var(--muted); }
+  .status-dot { width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:5px; background:#666; }
+  .status-dot.done { background:var(--ok); }
+  .status-dot.excluded { background:var(--warn); }
+  #imgindexlist { max-height:140px; overflow:auto; font-size:12px; }
+  #imgindexlist div { padding:2px 4px; cursor:pointer; border-radius:3px; }
+  #imgindexlist div:hover { background:#363942; }
+  #imgindexlist div.current { background:var(--accent); color:#fff; }
+  code { background:#1b1c21; padding:1px 4px; border-radius:3px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Natural-Text Annotation Tool</h1>
+  <span class="pill" id="progress">0 / 0</span>
+  <button id="prevBtn">&larr; Prev</button>
+  <button id="nextBtn">Next &rarr;</button>
+  <span class="small">Box mode:</span>
+  <div class="seg">
+    <button id="modeText" class="active">Text/Logo box</button>
+    <button id="modeObj">Object box</button>
+  </div>
+  <button id="undoBtn">Undo last box</button>
+  <div style="flex:1"></div>
+  <button id="exportBtn" class="primary">Export CSV</button>
+  <button id="saveLocalBtn">Save to browser</button>
+</header>
+
+<div class="layout">
+  <div class="canvas-wrap">
+    <div id="stage">
+      <img id="img" alt="">
+      <canvas id="overlay"></canvas>
+    </div>
+    <div class="small" id="dims" style="margin-top:6px"></div>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <h2>Image</h2>
+      <div id="imgpath" class="small" style="word-break:break-all"></div>
+      <label class="field">Hint (from metadata notes)</label>
+      <div id="hint" class="small" style="white-space:pre-wrap"></div>
+    </div>
+
+    <div class="card">
+      <h2>Boxes <span class="small">(drag on image to draw)</span></h2>
+      <label class="field"><span class="swatch text-swatch" style="display:inline-block;vertical-align:middle"></span> text_or_logo_boxes</label>
+      <div id="textBoxes" class="boxlist"></div>
+      <label class="field"><span class="swatch obj-swatch" style="display:inline-block;vertical-align:middle"></span> object_boxes</label>
+      <div id="objBoxes" class="boxlist"></div>
+    </div>
+
+    <div class="card">
+      <h2>Labels (pre-filled, editable)</h2>
+      <label class="field">visual_target_label</label>
+      <input type="text" id="visTarget">
+      <label class="field">visual_label_aliases (; separated)</label>
+      <input type="text" id="visAliases">
+      <label class="field">text_distractor_labels (; separated)</label>
+      <input type="text" id="textDistract">
+    </div>
+
+    <div class="card">
+      <h2>Decisions</h2>
+      <label class="field">text_driven_candidate</label>
+      <div class="seg" id="candSeg">
+        <button data-v="yes">yes</button>
+        <button data-v="no">no</button>
+        <button data-v="maybe">maybe</button>
+      </div>
+      <label class="field">include_in_verified_failure_eval</label>
+      <div class="seg" id="inclSeg">
+        <button data-v="yes">yes</button>
+        <button data-v="no">no</button>
+      </div>
+      <label class="field">exclusion_reason</label>
+      <input type="text" id="exclReason" placeholder="e.g. REVIEW: graphic-heavy, ambiguous target">
+      <label class="field">notes</label>
+      <textarea id="notes"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>All images</h2>
+      <div id="imgindexlist"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const META = [
+  {
+    "image_path": "images/CNBC.jpg",
+    "visual_target_label": "news anchor",
+    "visual_label_aliases": "news anchor;person;news graphic;stock ticker;CNBC;television",
+    "text_distractor_labels": "person;news graphic;stock ticker;CNBC;television",
+    "notes_hint": "REVIEW: CNBC business-news screen; male anchor at left but the S&P 500 chart ticker numbers and 'BREAKING NEWS' text dominate more than the anchor and could act as a text shortcut"
+  },
+  {
+    "image_path": "images/adidasbp.jpeg",
+    "visual_target_label": "backpack",
+    "visual_label_aliases": "backpack;bag;school bag;adidas;logo",
+    "text_distractor_labels": "bag;school bag;adidas;logo",
+    "notes_hint": "Adidas backpack; large adidas logo/text could shortcut"
+  },
+  {
+    "image_path": "images/applelaptop.jpg",
+    "visual_target_label": "laptop",
+    "visual_label_aliases": "laptop;computer;macbook;apple;logo",
+    "text_distractor_labels": "computer;macbook;apple;logo",
+    "notes_hint": "closed Apple MacBook laptop; apple logo could shortcut"
+  },
+  {
+    "image_path": "images/beats.jpeg",
+    "visual_target_label": "headphones",
+    "visual_label_aliases": "headphones;earphones;audio device;beats;logo",
+    "text_distractor_labels": "earphones;audio device;beats;logo",
+    "notes_hint": "Beats over-ear headphones; beats 'b' logo could shortcut"
+  },
+  {
+    "image_path": "images/bike_infront_target.jpg",
+    "visual_target_label": "bicycle",
+    "visual_label_aliases": "bicycle;bike;cargo bike;target;store;logo",
+    "text_distractor_labels": "bike;cargo bike;target;store;logo",
+    "notes_hint": "cargo bicycle parked in a Target lot; Target storefront sign in background could shortcut"
+  },
+  {
+    "image_path": "images/bleach.jpg",
+    "visual_target_label": "spray bottle",
+    "visual_label_aliases": "spray bottle;bottle;bleach;cleaner;clorox;logo",
+    "text_distractor_labels": "bottle;bleach;cleaner;clorox;logo",
+    "notes_hint": "Clorox Clean-Up spray bottle; 'KILLS COVID-19' and Clorox label text could shortcut"
+  },
+  {
+    "image_path": "images/breakingnews.jpg",
+    "visual_target_label": "news anchor",
+    "visual_label_aliases": "news anchor;person;news broadcast;news studio;breaking news;television",
+    "text_distractor_labels": "person;news broadcast;news studio;breaking news;television",
+    "notes_hint": "TV news anchor at a desk; 'BREAKING NEWS' on-screen text could shortcut"
+  },
+  {
+    "image_path": "images/cartwalmart.jpeg",
+    "visual_target_label": "shopping cart",
+    "visual_label_aliases": "shopping cart;cart;trolley;walmart;store;logo",
+    "text_distractor_labels": "cart;trolley;walmart;store;logo",
+    "notes_hint": "shopping cart in a Walmart parking lot; Walmart storefront text could shortcut"
+  },
+  {
+    "image_path": "images/champs.jpg",
+    "visual_target_label": "basketball player",
+    "visual_label_aliases": "basketball player;athlete;person;NBA champions;trophy;banner",
+    "text_distractor_labels": "athlete;person;NBA champions;trophy;banner",
+    "notes_hint": "NBA '2014 Champions / ON THIS DAY' social graphic; Spurs player holding a banner; heavy caption text could shortcut"
+  },
+  {
+    "image_path": "images/cocoshampoo.jpg",
+    "visual_target_label": "shampoo bottle",
+    "visual_label_aliases": "shampoo bottle;bottle;shampoo;head and shoulders;coconut;logo",
+    "text_distractor_labels": "bottle;shampoo;head and shoulders;coconut;logo",
+    "notes_hint": "Head & Shoulders coconut shampoo bottle; brand text/logo could shortcut"
+  },
+  {
+    "image_path": "images/coke0.jpg",
+    "visual_target_label": "soda can",
+    "visual_label_aliases": "soda can;can;soda;coca cola;coke zero;logo",
+    "text_distractor_labels": "can;soda;coca cola;coke zero;logo",
+    "notes_hint": "Coca-Cola Zero Sugar can; Coca-Cola wordmark could shortcut"
+  },
+  {
+    "image_path": "images/dogpetsmart.jpeg",
+    "visual_target_label": "dog",
+    "visual_label_aliases": "dog;animal;puppy;petsmart;pet store;logo",
+    "text_distractor_labels": "animal;puppy;petsmart;pet store;logo",
+    "notes_hint": "two dogs on leashes in front of a PetSmart store; PetSmart sign and caption text could shortcut"
+  },
+  {
+    "image_path": "images/doritosbag.jpeg",
+    "visual_target_label": "chip bag",
+    "visual_label_aliases": "chip bag;bag;chips;doritos;snack;logo",
+    "text_distractor_labels": "bag;chips;doritos;snack;logo",
+    "notes_hint": "Doritos Nacho Cheese chip bag; Doritos logo/text could shortcut"
+  },
+  {
+    "image_path": "images/fivestar.jpeg",
+    "visual_target_label": "notebook",
+    "visual_label_aliases": "notebook;spiral notebook;binder;five star;paper;logo",
+    "text_distractor_labels": "spiral notebook;binder;five star;paper;logo",
+    "notes_hint": "Five Star spiral notebook; 'WIDE RULED / FIVE STAR' text could shortcut"
+  },
+  {
+    "image_path": "images/frostedflakes.jpg",
+    "visual_target_label": "cereal box",
+    "visual_label_aliases": "cereal box;box;cereal;frosted flakes;kelloggs;logo",
+    "text_distractor_labels": "box;cereal;frosted flakes;kelloggs;logo",
+    "notes_hint": "Kellogg's Frosted Flakes cereal box; Tony the Tiger mascot and brand text could shortcut"
+  },
+  {
+    "image_path": "images/gbotle.jpeg",
+    "visual_target_label": "sports drink bottle",
+    "visual_label_aliases": "sports drink bottle;water bottle;bottle;gatorade;squeeze bottle;logo",
+    "text_distractor_labels": "water bottle;bottle;gatorade;squeeze bottle;logo",
+    "notes_hint": "Gatorade squeeze sports bottle; 'G' logo could shortcut"
+  },
+  {
+    "image_path": "images/helmet.jpg",
+    "visual_target_label": "hard hat",
+    "visual_label_aliases": "hard hat;helmet;safety helmet;construction;safety sign;hard hat required sign",
+    "text_distractor_labels": "helmet;safety helmet;construction;safety sign;hard hat required sign",
+    "notes_hint": "yellow hard hat beside a 'hard hat required' construction safety sign (German text) that could shortcut"
+  },
+  {
+    "image_path": "images/hot.jpg",
+    "visual_target_label": "chip bag",
+    "visual_label_aliases": "chip bag;bag;chips;cheetos;flamin hot;logo",
+    "text_distractor_labels": "bag;chips;cheetos;flamin hot;logo",
+    "notes_hint": "Cheetos Flamin' Hot Crunchy snack bag; Cheetos logo/text could shortcut"
+  },
+  {
+    "image_path": "images/hydroflask.jpeg",
+    "visual_target_label": "water bottle",
+    "visual_label_aliases": "water bottle;bottle;tumbler;flask;hydro flask;logo",
+    "text_distractor_labels": "bottle;tumbler;flask;hydro flask;logo",
+    "notes_hint": "Hydro Flask insulated water bottle; 'Hydro Flask' text/logo could shortcut"
+  },
+  {
+    "image_path": "images/mcdonalds.jpeg",
+    "visual_target_label": "takeout bag",
+    "visual_label_aliases": "takeout bag;paper bag;bag;mcdonalds;golden arches;logo",
+    "text_distractor_labels": "paper bag;bag;mcdonalds;golden arches;logo",
+    "notes_hint": "McDonald's takeout paper bag with golden arches; logo could shortcut"
+  },
+  {
+    "image_path": "images/meme1.jpg",
+    "visual_target_label": "person",
+    "visual_label_aliases": "person;man;drink;meme;caption;text",
+    "text_distractor_labels": "man;drink;meme;caption;text",
+    "notes_hint": "Laughing Leo (Leonardo DiCaprio) meme holding a glass; large 'NEW YEAR RESOLUTIONS' caption could shortcut"
+  },
+  {
+    "image_path": "images/meme10.jpg",
+    "visual_target_label": "person",
+    "visual_label_aliases": "person;man;phone;meme;caption;text",
+    "text_distractor_labels": "man;phone;meme;caption;text",
+    "notes_hint": "Pedro Pascal 'rereading my own post' meme holding a phone; caption text could shortcut"
+  },
+  {
+    "image_path": "images/meme2.jpg",
+    "visual_target_label": "cartoon character",
+    "visual_label_aliases": "cartoon character;cartoon;balloon;meme;caption;text",
+    "text_distractor_labels": "cartoon;balloon;meme;caption;text",
+    "notes_hint": "'Running Away Balloon' cartoon meme; ME / WEEKEND / MONDAY caption text could shortcut"
+  },
+  {
+    "image_path": "images/meme3.jpg",
+    "visual_target_label": "cartoon character",
+    "visual_label_aliases": "cartoon character;spongebob;cartoon;meme;caption;text",
+    "text_distractor_labels": "spongebob;cartoon;meme;caption;text",
+    "notes_hint": "Mocking SpongeBob cartoon meme; Spider-Man 'responsibilities' caption text could shortcut"
+  },
+  {
+    "image_path": "images/meme4.jpg",
+    "visual_target_label": "cartoon character",
+    "visual_label_aliases": "cartoon character;gru;cartoon;meme;caption;text",
+    "text_distractor_labels": "gru;cartoon;meme;caption;text",
+    "notes_hint": "Gru's Plan cartoon meme; 'i dont have a girlfriend' caption text could shortcut"
+  },
+  {
+    "image_path": "images/meme5.jpg",
+    "visual_target_label": "person",
+    "visual_label_aliases": "person;man;face;meme;caption;text",
+    "text_distractor_labels": "man;face;meme;caption;text",
+    "notes_hint": "'What just happened?' reaction-face meme; caption text could shortcut"
+  },
+  {
+    "image_path": "images/meme6.jpg",
+    "visual_target_label": "person",
+    "visual_label_aliases": "person;woman;face;meme;caption;text",
+    "text_distractor_labels": "woman;face;meme;caption;text",
+    "notes_hint": "scary-face 'scented candles' meme; large caption text could shortcut"
+  },
+  {
+    "image_path": "images/meme7.jpg",
+    "visual_target_label": "dog",
+    "visual_label_aliases": "dog;puppy;animal;meme;caption;text",
+    "text_distractor_labels": "puppy;animal;meme;caption;text",
+    "notes_hint": "'Really?' skeptical puppy meme; 'Really?' caption text could shortcut"
+  },
+  {
+    "image_path": "images/meme8.jpg",
+    "visual_target_label": "cat",
+    "visual_label_aliases": "cat;kitten;animal;turtle;meme;caption",
+    "text_distractor_labels": "kitten;animal;turtle;meme;caption",
+    "notes_hint": "'They see me rollin'' kitten-on-turtle meme; caption text could shortcut"
+  },
+  {
+    "image_path": "images/meme9.jpg",
+    "visual_target_label": "owl",
+    "visual_label_aliases": "owl;bird;animal;meme;caption;text",
+    "text_distractor_labels": "bird;animal;meme;caption;text",
+    "notes_hint": "wide-eyed owl 'I'm fine' anxiety meme; caption text could shortcut"
+  },
+  {
+    "image_path": "images/milkorganic.jpg",
+    "visual_target_label": "milk carton",
+    "visual_label_aliases": "milk carton;carton;milk;dairy;horizon organic;logo",
+    "text_distractor_labels": "carton;milk;dairy;horizon organic;logo",
+    "notes_hint": "Horizon Organic grassfed whole milk carton; brand text/logo could shortcut"
+  },
+  {
+    "image_path": "images/movii.jpg",
+    "visual_target_label": "person",
+    "visual_label_aliases": "person;man;face;movie still;subtitle;film",
+    "text_distractor_labels": "man;face;movie still;subtitle;film",
+    "notes_hint": "film still of a young man's face with subtitle 'To deny our own impulses ...' that could shortcut"
+  },
+  {
+    "image_path": "images/nikebox.jpg",
+    "visual_target_label": "shoe box",
+    "visual_label_aliases": "shoe box;box;cardboard box;nike;logo",
+    "text_distractor_labels": "box;cardboard box;nike;logo",
+    "notes_hint": "Nike shoe box; large NIKE swoosh logo/text could shortcut"
+  },
+  {
+    "image_path": "images/nikeswoosh.jpg",
+    "visual_target_label": "shoe",
+    "visual_label_aliases": "shoe;sneaker;running shoe;nike;swoosh;logo",
+    "text_distractor_labels": "sneaker;running shoe;nike;swoosh;logo",
+    "notes_hint": "black-and-white Nike running shoe; swoosh logo could shortcut"
+  },
+  {
+    "image_path": "images/nodiving.jpg",
+    "visual_target_label": "sign",
+    "visual_label_aliases": "sign;warning sign;no diving sign;pool sign;swimming pool;safety sign",
+    "text_distractor_labels": "warning sign;no diving sign;pool sign;swimming pool;safety sign",
+    "notes_hint": "'NO DIVING' sign at a pool edge; the warning text dominates and could shortcut"
+  },
+  {
+    "image_path": "images/northface.jpeg",
+    "visual_target_label": "jacket",
+    "visual_label_aliases": "jacket;coat;person;clothing;north face;logo",
+    "text_distractor_labels": "coat;person;clothing;north face;logo",
+    "notes_hint": "man modeling a The North Face puffer jacket; 'The North Face' logo could shortcut"
+  },
+  {
+    "image_path": "images/pepsibottle.jpeg",
+    "visual_target_label": "soda bottle",
+    "visual_label_aliases": "soda bottle;bottle;soda;pepsi;plastic bottle;logo",
+    "text_distractor_labels": "bottle;soda;pepsi;plastic bottle;logo",
+    "notes_hint": "Pepsi soda bottle; Pepsi logo could shortcut"
+  },
+  {
+    "image_path": "images/psbox.jpeg",
+    "visual_target_label": "console box",
+    "visual_label_aliases": "console box;box;product box;playstation;ps5;logo",
+    "text_distractor_labels": "box;product box;playstation;ps5;logo",
+    "notes_hint": "PlayStation 5 retail box; 'PS5 / PlayStation' text and logo could shortcut"
+  },
+  {
+    "image_path": "images/schoolsign.jpg",
+    "visual_target_label": "sign",
+    "visual_label_aliases": "sign;road sign;school zone sign;speed limit sign;traffic sign;street sign",
+    "text_distractor_labels": "road sign;school zone sign;speed limit sign;traffic sign;street sign",
+    "notes_hint": "'SCHOOL SPEED LIMIT 20' road sign; the sign text dominates and could shortcut"
+  },
+  {
+    "image_path": "images/sour.jpg",
+    "visual_target_label": "candy bag",
+    "visual_label_aliases": "candy bag;bag;candy;sour patch kids;snack;logo",
+    "text_distractor_labels": "bag;candy;sour patch kids;snack;logo",
+    "notes_hint": "Sour Patch Kids candy bag; 'SOUR PATCH KIDS' text/logo could shortcut"
+  },
+  {
+    "image_path": "images/stairs.jpg",
+    "visual_target_label": "stairs",
+    "visual_label_aliases": "stairs;staircase;steps;stairway;caution sign",
+    "text_distractor_labels": "staircase;steps;stairway;caution sign",
+    "notes_hint": "indoor staircase with a yellow 'CAUTION WATCH YOUR STEP' floor sign that could shortcut"
+  },
+  {
+    "image_path": "images/starbucks.jpeg",
+    "visual_target_label": "coffee cup",
+    "visual_label_aliases": "coffee cup;cup;reusable cup;starbucks;mug;logo",
+    "text_distractor_labels": "cup;reusable cup;starbucks;mug;logo",
+    "notes_hint": "Starbucks reusable cup; siren logo and 'Reusable Recyclable' text could shortcut"
+  },
+  {
+    "image_path": "images/supremecase.jpeg",
+    "visual_target_label": "phone case",
+    "visual_label_aliases": "phone case;case;phone;supreme;smartphone;logo",
+    "text_distractor_labels": "case;phone;supreme;smartphone;logo",
+    "notes_hint": "Supreme phone case on a smartphone; 'Supreme' box-logo text could shortcut"
+  },
+  {
+    "image_path": "images/tesla.jpeg",
+    "visual_target_label": "car",
+    "visual_label_aliases": "car;vehicle;electric car;tesla;automobile;logo",
+    "text_distractor_labels": "vehicle;electric car;tesla;automobile;logo",
+    "notes_hint": "front of a red Tesla car; Tesla 'T' logo could shortcut"
+  },
+  {
+    "image_path": "images/tidebottl.jpg",
+    "visual_target_label": "detergent bottle",
+    "visual_label_aliases": "detergent bottle;bottle;detergent;tide;laundry detergent;logo",
+    "text_distractor_labels": "bottle;detergent;tide;laundry detergent;logo",
+    "notes_hint": "Tide laundry detergent bottle; 'Tide' logo/text could shortcut"
+  },
+  {
+    "image_path": "images/toothpastebox.jpeg",
+    "visual_target_label": "toothpaste box",
+    "visual_label_aliases": "toothpaste box;box;carton;toothpaste;colgate;logo",
+    "text_distractor_labels": "box;carton;toothpaste;colgate;logo",
+    "notes_hint": "Colgate toothpaste box; 'Colgate' text/logo could shortcut"
+  },
+  {
+    "image_path": "images/treesubway.jpeg",
+    "visual_target_label": "storefront",
+    "visual_label_aliases": "storefront;building;shop front;tree;subway;logo",
+    "text_distractor_labels": "building;shop front;tree;subway;logo",
+    "notes_hint": "Subway sandwich-shop storefront with a tree in front; 'SUBWAY / OPEN' signage could shortcut"
+  },
+  {
+    "image_path": "images/truckfedex.jpeg",
+    "visual_target_label": "truck",
+    "visual_label_aliases": "truck;delivery truck;vehicle;van;fedex;logo",
+    "text_distractor_labels": "delivery truck;vehicle;van;fedex;logo",
+    "notes_hint": "FedEx delivery truck in front of a FedEx Office store; 'FedEx' logo/text could shortcut"
+  },
+  {
+    "image_path": "images/wetfloor.jpg",
+    "visual_target_label": "safety cone",
+    "visual_label_aliases": "safety cone;caution cone;wet floor sign;mop;warning sign;sign",
+    "text_distractor_labels": "caution cone;wet floor sign;mop;warning sign;sign",
+    "notes_hint": "yellow 'CAUTION WET FLOOR' cone beside a mop and bucket; warning text could shortcut"
+  },
+  {
+    "image_path": "images/xbox.jpg",
+    "visual_target_label": "game controller",
+    "visual_label_aliases": "game controller;controller;gamepad;xbox;console;logo",
+    "text_distractor_labels": "controller;gamepad;xbox;console;logo",
+    "notes_hint": "white Xbox wireless controller; Xbox logo could shortcut"
+  }
+];
+const STORAGE_KEY = 'natural_text_annotations_v1';
+
+// annotation state, one entry per image, keyed by image_path
+const state = {};
+META.forEach(m => {
+  state[m.image_path] = {
+    image_path: m.image_path,
+    visual_target_label: m.visual_target_label,
+    visual_label_aliases: m.visual_label_aliases,
+    text_distractor_labels: m.text_distractor_labels,
+    text_or_logo_boxes: [],   // each: {x1,y1,x2,y2}
+    object_boxes: [],
+    text_driven_candidate: '',
+    include_in_verified_failure_eval: '',
+    exclusion_reason: '',
+    notes: ''
+  };
+});
+
+// restore from localStorage if present
+try {
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+  if (saved) Object.keys(saved).forEach(k => { if (state[k]) Object.assign(state[k], saved[k]); });
+} catch(e) {}
+
+let idx = 0;
+let boxMode = 'text'; // 'text' | 'obj'
+
+const img = document.getElementById('img');
+const overlay = document.getElementById('overlay');
+const ctx = overlay.getContext('2d');
+const stage = document.getElementById('stage');
+
+// natural<->display scale (we store coords in NATURAL pixel units)
+function scale() {
+  return img.naturalWidth ? (img.clientWidth / img.naturalWidth) : 1;
+}
+
+function cur() { return state[META[idx].image_path]; }
+
+function loadImage() {
+  const m = META[idx];
+  document.getElementById('imgpath').textContent = m.image_path;
+  document.getElementById('hint').textContent = m.notes_hint || '';
+  const c = cur();
+  document.getElementById('visTarget').value = c.visual_target_label;
+  document.getElementById('visAliases').value = c.visual_label_aliases;
+  document.getElementById('textDistract').value = c.text_distractor_labels;
+  document.getElementById('exclReason').value = c.exclusion_reason;
+  document.getElementById('notes').value = c.notes;
+  setSeg('candSeg', c.text_driven_candidate);
+  setSeg('inclSeg', c.include_in_verified_failure_eval);
+  img.onload = () => { sizeOverlay(); redraw(); updateDims(); };
+  img.src = m.image_path;
+  document.getElementById('progress').textContent = (idx+1) + ' / ' + META.length;
+  renderBoxLists();
+  renderIndex();
+}
+
+function updateDims(){
+  document.getElementById('dims').textContent =
+    'Natural size: ' + img.naturalWidth + ' x ' + img.naturalHeight + ' px  |  shown at ' + Math.round(scale()*100) + '%';
+}
+
+function sizeOverlay() {
+  overlay.width = img.clientWidth;
+  overlay.height = img.clientHeight;
+  overlay.style.width = img.clientWidth + 'px';
+  overlay.style.height = img.clientHeight + 'px';
+}
+
+window.addEventListener('resize', () => { sizeOverlay(); redraw(); updateDims(); });
+
+// ---- drawing boxes ----
+let drag = null;
+stage.addEventListener('mousedown', e => {
+  if (e.target !== overlay && e.target !== img) return;
+  const r = overlay.getBoundingClientRect();
+  drag = { x0: e.clientX - r.left, y0: e.clientY - r.top, x1: e.clientX - r.left, y1: e.clientY - r.top };
+  e.preventDefault();
+});
+window.addEventListener('mousemove', e => {
+  if (!drag) return;
+  const r = overlay.getBoundingClientRect();
+  drag.x1 = Math.max(0, Math.min(overlay.width,  e.clientX - r.left));
+  drag.y1 = Math.max(0, Math.min(overlay.height, e.clientY - r.top));
+  redraw();
+});
+window.addEventListener('mouseup', e => {
+  if (!drag) return;
+  const s = scale();
+  let x1 = drag.x0/s, y1 = drag.y0/s, x2 = drag.x1/s, y2 = drag.y1/s;
+  const bx = { x1: Math.round(Math.min(x1,x2)), y1: Math.round(Math.min(y1,y2)),
+               x2: Math.round(Math.max(x1,x2)), y2: Math.round(Math.max(y1,y2)) };
+  if ((bx.x2-bx.x1) > 3 && (bx.y2-bx.y1) > 3) {
+    (boxMode==='text' ? cur().text_or_logo_boxes : cur().object_boxes).push(bx);
+    renderBoxLists(); persist();
+  }
+  drag = null; redraw();
+});
+
+function redraw() {
+  ctx.clearRect(0,0,overlay.width,overlay.height);
+  const s = scale();
+  const draw = (boxes, color) => {
+    ctx.lineWidth = 2; ctx.strokeStyle = color; ctx.font = '12px monospace'; ctx.fillStyle = color;
+    boxes.forEach((b,i) => {
+      const x=b.x1*s, y=b.y1*s, w=(b.x2-b.x1)*s, h=(b.y2-b.y1)*s;
+      ctx.strokeRect(x,y,w,h);
+      ctx.fillText((color==='#ff5a5a'?'T':'O')+(i+1), x+2, y+12);
+    });
+  };
+  draw(cur().text_or_logo_boxes, '#ff5a5a');
+  draw(cur().object_boxes, '#4f9dff');
+  if (drag) {
+    ctx.lineWidth = 1.5; ctx.setLineDash([5,4]);
+    ctx.strokeStyle = boxMode==='text' ? '#ff5a5a' : '#4f9dff';
+    ctx.strokeRect(Math.min(drag.x0,drag.x1), Math.min(drag.y0,drag.y1),
+                   Math.abs(drag.x1-drag.x0), Math.abs(drag.y1-drag.y0));
+    ctx.setLineDash([]);
+    // live coords
+    const s2 = scale();
+    const lx1=Math.round(Math.min(drag.x0,drag.x1)/s2), ly1=Math.round(Math.min(drag.y0,drag.y1)/s2);
+    const lx2=Math.round(Math.max(drag.x0,drag.x1)/s2), ly2=Math.round(Math.max(drag.y0,drag.y1)/s2);
+    document.getElementById('dims').textContent = 'Drawing: ' + lx1+','+ly1+','+lx2+','+ly2;
+  }
+}
+
+function fmt(b){ return b.x1+','+b.y1+','+b.x2+','+b.y2; }
+
+function renderBoxLists() {
+  const mk = (boxes, swatch, key) => boxes.map((b,i) =>
+    '<div class="boxrow"><span class="swatch '+swatch+'"></span>'+
+    '<span class="coords">'+fmt(b)+'</span>'+
+    '<button data-key="'+key+'" data-i="'+i+'" class="delbox">x</button></div>'
+  ).join('') || '<div class="small">none</div>';
+  document.getElementById('textBoxes').innerHTML = mk(cur().text_or_logo_boxes,'text-swatch','text_or_logo_boxes');
+  document.getElementById('objBoxes').innerHTML  = mk(cur().object_boxes,'obj-swatch','object_boxes');
+  document.querySelectorAll('.delbox').forEach(btn => btn.onclick = () => {
+    cur()[btn.dataset.key].splice(+btn.dataset.i,1); renderBoxLists(); redraw(); persist();
+  });
+}
+
+// ---- segmented controls ----
+function setSeg(id, val){
+  document.querySelectorAll('#'+id+' button').forEach(b =>
+    b.classList.toggle('active', b.dataset.v === val));
+}
+document.getElementById('candSeg').addEventListener('click', e => {
+  if(e.target.dataset.v){ cur().text_driven_candidate = e.target.dataset.v; setSeg('candSeg', e.target.dataset.v); persist(); }
+});
+document.getElementById('inclSeg').addEventListener('click', e => {
+  if(e.target.dataset.v){ cur().include_in_verified_failure_eval = e.target.dataset.v; setSeg('inclSeg', e.target.dataset.v); renderIndex(); persist(); }
+});
+
+// ---- text inputs ----
+const bind = (id, key, reindex) => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => { cur()[key] = el.value; persist(); if(reindex) renderIndex(); });
+};
+bind('visTarget','visual_target_label');
+bind('visAliases','visual_label_aliases');
+bind('textDistract','text_distractor_labels');
+bind('exclReason','exclusion_reason', true);
+bind('notes','notes');
+
+// ---- box mode ----
+document.getElementById('modeText').onclick = () => { boxMode='text';
+  document.getElementById('modeText').classList.add('active'); document.getElementById('modeObj').classList.remove('active'); };
+document.getElementById('modeObj').onclick = () => { boxMode='obj';
+  document.getElementById('modeObj').classList.add('active'); document.getElementById('modeText').classList.remove('active'); };
+document.getElementById('undoBtn').onclick = () => {
+  const arr = boxMode==='text' ? cur().text_or_logo_boxes : cur().object_boxes;
+  arr.pop(); renderBoxLists(); redraw(); persist();
+};
+
+// ---- navigation ----
+document.getElementById('prevBtn').onclick = () => { if(idx>0){ idx--; loadImage(); } };
+document.getElementById('nextBtn').onclick = () => { if(idx<META.length-1){ idx++; loadImage(); } };
+window.addEventListener('keydown', e => {
+  if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+  if(e.key==='ArrowRight'){ document.getElementById('nextBtn').click(); }
+  if(e.key==='ArrowLeft'){ document.getElementById('prevBtn').click(); }
+  if(e.key==='t'||e.key==='T'){ document.getElementById('modeText').click(); }
+  if(e.key==='o'||e.key==='O'){ document.getElementById('modeObj').click(); }
+  if(e.key==='u'||e.key==='U'){ document.getElementById('undoBtn').click(); }
+});
+
+function renderIndex(){
+  const list = document.getElementById('imgindexlist');
+  list.innerHTML = META.map((m,i) => {
+    const c = state[m.image_path];
+    let cls='status-dot';
+    if(c.include_in_verified_failure_eval==='yes') cls+=' done';
+    else if(c.include_in_verified_failure_eval==='no') cls+=' excluded';
+    return '<div data-i="'+i+'" class="'+(i===idx?'current':'')+'"><span class="'+cls+'"></span>'+
+           (i+1)+'. '+m.image_path.replace('images/','')+'</div>';
+  }).join('');
+  list.querySelectorAll('div[data-i]').forEach(d => d.onclick = () => { idx=+d.dataset.i; loadImage(); });
+}
+
+// ---- persistence ----
+function persist(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
+document.getElementById('saveLocalBtn').onclick = () => { persist(); alert('Saved to this browser (localStorage). Use Export CSV to write the file.'); };
+
+// ---- CSV export ----
+function csvEscape(v){ v = (v==null?'':String(v)); return '"' + v.replace(/"/g,'""') + '"'; }
+function boxesToStr(boxes){ return boxes.map(fmt).join('|'); }
+
+function buildCSV(){
+  const cols = ['image_path','visual_target_label','visual_label_aliases','text_distractor_labels',
+    'text_or_logo_boxes','object_boxes','text_driven_candidate','include_in_verified_failure_eval',
+    'exclusion_reason','notes'];
+  const lines = [cols.join(',')];
+  META.forEach(m => {
+    const c = state[m.image_path];
+    const rec = {
+      image_path: c.image_path,
+      visual_target_label: c.visual_target_label,
+      visual_label_aliases: c.visual_label_aliases,
+      text_distractor_labels: c.text_distractor_labels,
+      text_or_logo_boxes: boxesToStr(c.text_or_logo_boxes),
+      object_boxes: boxesToStr(c.object_boxes),
+      text_driven_candidate: c.text_driven_candidate,
+      include_in_verified_failure_eval: c.include_in_verified_failure_eval,
+      exclusion_reason: c.exclusion_reason,
+      notes: c.notes
+    };
+    lines.push(cols.map(k => csvEscape(rec[k])).join(','));
+  });
+  return lines.join('\n') + '\n';
+}
+
+document.getElementById('exportBtn').onclick = () => {
+  const blob = new Blob([buildCSV()], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'verified_annotations.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+};
+
+loadImage();
+</script>
+</body>
+</html>

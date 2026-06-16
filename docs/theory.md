@@ -264,6 +264,213 @@ per-input class-balance condition can still hold: the shortcut effect need not b
 shared global direction for *per-input* neutralization to leave an approximately
 class-independent residual.
 
+## 10. Shortcut-type-agnostic generalization (proposal completeness)
+
+The recovery results above are stated for a shortcut "value/region". They generalize,
+**without changing strength**, to arbitrary shortcut types under one structural
+assumption about the candidate set. The full development — with a no-free-lunch
+impossibility theorem that explains *why* the finite-candidate restriction is
+fundamental — is in [`global_cic_theory_attempt.md`](global_cic_theory_attempt.md);
+the core is summarized here.
+
+**Proposal completeness.** A proposal/intervention family `A(x)` is
+**(ε_C, ε_S, ε_B)-complete** for shortcut `s` if some `a* ∈ A(x)` (i) preserves the
+causal content up to damage `ε_C`, (ii) neutralizes the shortcut up to residual `ε_S`,
+(iii) introduces no larger new shortcut, and (iv) leaves the repaired logits close to
+the clean logits up to a class-independent offset, i.e. residual-to-clean class
+imbalance `max_y |ρ_y^{a*}(x) - ρ̄^{a*}(x)| ≤ ε_B` (with `ε_B ≤ ε_C + ε_S + ε_ξ`). Call
+such an `a*` a *good intervention*.
+
+**Theorem (proposal-complete CIC repair).** If `A(x)` is complete for `s`,
+`m_clean(x) > 2ε_B`, CIC scoring ranks a good intervention above all harmful
+candidates by margin `γ`, and scoring noise is below `γ/2`, then top-1 CIC selects a
+good intervention and the repaired prediction equals the clean causal prediction `y*`.
+The conclusion is **independent of whether the shortcut is text, icon, watermark,
+background, or texture**, as long as the family contains a good intervention. (Proof:
+a selection lemma — bounded noise cannot overturn a `γ`-margin ranking — composed with
+the per-input residual-to-clean recovery corollary of Section 9.) A top-`k`
+consensus corollary holds when the aggregated intervention keeps the residual
+class-balanced (averaging does *not* inherit single-member class-balance for free).
+
+**Observable gate (Theorem 2 in the attempt doc).** Because `ε_B` and `m_clean` are
+not observable at deployment, an observable-margin lemma certifies recovery from the
+*repaired* margin: if the intervention is good and `m(T_a(x)) > 2ε_B`, the repaired
+argmax equals the clean argmax. A calibrated gate `G(x,a)` over observables (top-1/median
+score gap, repaired margin, stability gain, selected area, clean-safe score)
+upper-bounds `ε_B ≤ ε̂` via an **explicit empirical calibration step** on validation
+data; then repair is certified when `G` holds and `m(T_a(x)) > 2ε̂`. The gate→`ε̂`
+implication is a validation-set bound, not a closed-form theorem — this is stated
+honestly.
+
+**No-free-lunch impossibility.** Without assumptions on the proposal family, **no
+finite-query black-box counterfactual method can guarantee discovery or repair of
+arbitrary shortcuts.** For any such algorithm one can construct two worlds that produce
+identical observations on every queried intervention but have different unobservable
+causal labels `y*`, so the algorithm's single action repairs in one world and fails in
+the other. This is exactly the failure of proposal completeness, and it shows that
+"finite-candidate" is a *necessary* condition for any counterfactual shortcut method,
+not a weakness of CIC specifically.
+
+**Reframing.** The positive guarantee is **shortcut-type-agnostic under proposal
+completeness and a class-balanced residual condition**; the impossibility theorem
+explains why **assumption-free open-world shortcut discovery is impossible** for finite
+black-box methods. CIC is therefore a **general theorem over intervention families, not
+over arbitrary unobserved shortcuts** — a principled middle ground, not universal
+discovery and not universal repair. Empirically this matches the experiments: proposal
+completeness and the selection margin are approximately satisfied for text overlays and
+semantic-decoy icons (positive), coarse regions still cover the shortcut in the spatial
+audit (low `ε_C`), and **both fail** for the weak/flat watermark channel (the measured
+instance of the impossibility regime). The machine-checkable encoding of these
+inequalities is in `causal_reliability/theory/proposal_completeness.py`
+(`tests/test_proposal_completeness_theory.py`).
+
+## 11. Complete finite-candidate characterization of CIC repair
+
+The sections above give a *sufficient* recovery account. This section closes the
+finite-candidate setting with a **complete characterization**: an exact
+necessary-and-sufficient repair criterion, a margin certificate that is **tight**
+(sharp at its boundary), an upper bound on localization that no scorer can beat, and
+an explicit conflict between repair and localization. The machine-checkable encoding
+is `causal_reliability/theory/finite_candidate_characterization.py`
+(`tests/test_finite_candidate_characterization.py`).
+
+**Scope (unchanged).** This is a characterization *inside a finite candidate set*. It
+does **not** claim open-world shortcut discovery, semantic correctness, exact
+text-box localization, or general robustness. It is not a universal-robustness or
+universal-repair result.
+
+**Setup.** Let `A(x)` be a finite proposal/intervention set indexed by candidate `a`.
+Let `T_a(x)` be the repaired/intervened input for candidate `a`, and `z_a = f(T_a(x))`
+the repaired logits. Let `y*` be the clean/causal label, used **only** for the
+theorem/evaluation, never for inference. Write the residual decomposition
+`z_a = z_clean + r_a` with `z_clean = f(x_clean)`.
+
+### 11.1 Exact repair criterion (necessary and sufficient)
+
+**Theorem 11.1 (exact repair criterion).** A candidate `a` repairs exactly when
+
+    z_a(y*) > max_{j != y*} z_a(j).
+
+Equivalently, with `z_a = z_clean + r_a`, repair occurs iff for every competing label
+`j`:
+
+    z_clean(y*) - z_clean(j) > r_a(j) - r_a(y*).
+
+*Proof.* "Repair" is by definition the event that the repaired argmax equals `y*` with
+strict separation from every competitor, i.e. `z_a(y*) > z_a(j)` for all `j != y*`,
+which is precisely the displayed inequality. Substituting `z_a = z_clean + r_a` into
+`z_a(y*) > z_a(j)` and rearranging gives `z_clean(y*) - z_clean(j) > r_a(j) - r_a(y*)`
+for each `j`. ∎
+
+*Interpretation.* This is necessary **and** sufficient — there is nothing left to
+prove about whether a *given* candidate repairs; the only open question is whether the
+finite set `A(x)` contains such a candidate and whether the scorer selects it. Those
+two questions are answered by §11.3 (coverage) and the selection lemma of Section 10.
+
+### 11.2 Tight residual-margin certificate
+
+Let the clean causal margin be `m_clean = z_clean(y*) - max_{j != y*} z_clean(j)` and
+suppose the residual class-score imbalance is bounded by `epsilon`, i.e.
+`max_y |r_a(y) - mean_y r_a| <= epsilon`.
+
+**Theorem 11.2a (sufficiency).** If `m_clean > 2 epsilon`, then `a` repairs.
+
+*Proof.* The worst-case pairwise swing between any competitor `j` and `y*` is
+`r_a(j) - r_a(y*) = (r_a(j) - mean) - (r_a(y*) - mean) <= epsilon - (-epsilon) =
+2 epsilon`. By Theorem 11.1, repair holds when `m_clean > r_a(j) - r_a(y*)` for all
+`j`; since the right side is at most `2 epsilon`, `m_clean > 2 epsilon` suffices. ∎
+
+**Theorem 11.2b (tightness).** If `m_clean <= 2 epsilon`, there exists an allowed
+residual perturbation (class imbalance `<= epsilon`) that flips the top class.
+
+*Proof (explicit witness).* Let `j` be the leading competitor. Set `r_a(y*) = -epsilon`,
+`r_a(j) = +epsilon`, and `r_a(k) = 0` otherwise. The two offsets cancel, so `r_a` is
+mean-zero and its class-centered imbalance is exactly `epsilon` (allowed). The repaired
+gap is `(z_clean(y*) - epsilon) - (z_clean(j) + epsilon) = m_clean - 2 epsilon <= 0`, so
+`j` catches or overtakes `y*` and the repaired argmax is no longer `y*`. ∎
+
+*Interpretation.* The margin certificate is **sharp** under the residual-instability
+model: `2 epsilon` is exactly the threshold — above it every allowed residual repairs,
+at or below it some allowed residual breaks repair. No looser bound is possible. This
+matches and tightens the sufficient conditions of Sections 4 and 9 (whose `2 epsilon_B`
+threshold is the same constant), now shown to be unimprovable.
+
+### 11.3 Proposal coverage ceiling
+
+For a localization property at threshold `tau`, define the per-input coverage indicator
+
+    R_tau(x) = 1[ there exists a candidate proposal a in A(x) with overlap >= tau ].
+
+**Theorem 11.3 (coverage ceiling).** For **any** scoring/ranking method that chooses
+one candidate from `A(x)`, localization success at threshold `tau` is upper-bounded by
+`E[R_tau(x)]`:
+
+    E[ 1[ overlap(selected) >= tau ] ] <= E[ R_tau(x) ].
+
+*Proof.* Per input, if the selected proposal has overlap `>= tau` then *some* proposal
+does, so `1[overlap(selected) >= tau] <= R_tau(x)` pointwise. Taking expectations
+preserves the inequality. The bound is attained by the oracle scorer that always picks
+the highest-overlap proposal. ∎
+
+*Interpretation.* If the proposal generator does not contain enough valid candidates,
+**no** scorer — however good — can pass the localization gate. This explains the
+COCO-Text result: the localization shortfall is **partly** bounded by proposal
+coverage and **mostly** by ranking (see §11.5). It does not say CIC localizes text; it
+bounds what any selection method could achieve given the proposal set.
+
+### 11.4 Repair-localization conflict
+
+**Theorem 11.4 (repair-localization conflict).** There exist finite-candidate repair
+problems where the repair-optimal proposal is **not** the localization-optimal
+proposal.
+
+*Proof (explicit construction).* Take `y* = 0` and two candidates:
+
+- `text_box`: human/text-box overlap `0.90` (localization-optimal), repaired logits
+  `(0.20, 0.80, 0.00)` — a competing class still wins, so it does **not** repair (weak
+  repair effect despite high overlap);
+- `object_region`: text overlap `0.05` (low), repaired logits `(1.50, 0.30, 0.00)` —
+  the causal class `0` is restored, so it **does** repair (strong repair effect from a
+  non-text region).
+
+The localization-optimal proposal is `text_box`; the repair-optimal proposal is
+`object_region`; they differ. ∎
+
+*Interpretation.* Repair success does **not** imply text-box localization. A
+text-overlapping proposal can have high human-box overlap but weak repair effect, while
+a non-text/object/background proposal can have low text overlap but a stronger repair
+effect. This justifies reporting COCO-Text as **directional repair evidence** without
+claiming localization support.
+
+### 11.5 Connection to the COCO-Text experiments
+
+The characterization makes the COCO-Text natural-image limitation **theoretically
+expected**, not merely an implementation failure (authoritative numbers in
+`results/coco_text_cic_full/coco_text_full_key_numbers.json` and
+`results/coco_text_cic_localization_diagnostic/localization_diagnostic_key_numbers.json`):
+
+- On the strict oracle-repairable subset, CIC beats matched random alias-aware repair
+  by **+0.333** (`0.538` vs `0.205`) — directional repair works (Theorem 11.1/11.2:
+  the selected intervention restores the causal margin for those examples).
+- Selected proposals overlap annotated text boxes in only **0.128** of strict cases, so
+  the support gates stay `false` — localization is *not* claimed.
+- The localization diagnostic shows text-overlapping proposals **exist** (in `0.564` of
+  strict cases) but are **ranked below** more causally effective regions (median rank of
+  the best text proposal `4.0`; primary diagnosis `ranking_failure`, ranking accounts for
+  `~92%` of the shortfall while coverage caps the rest). This is Theorem 11.3 in action:
+  coverage `0.564 < 0.60` gate ceilings the gate even with perfect ranking, but the
+  dominant gap is ranking.
+- **Forcing** the best text-overlap proposal repairs **worse** than the selected CIC
+  region (`best_text_alias_repair 0.163 < selected 0.439`; `best_text_beats_selected =
+  false`). This is exactly Theorem 11.4: the repair-optimal proposal is not the
+  localization-optimal proposal.
+
+Therefore the natural-image localization limitation follows from the finite-candidate
+characterization: repair is certified by the margin/residual criterion (11.1–11.2),
+localization is ceilinged by proposal coverage (11.3), and the two optima genuinely
+diverge (11.4) — so COCO-Text is reported as directional repair evidence, not
+localization support.
+
 ---
 
 ## Empirical-support status
@@ -353,3 +560,49 @@ the theory section is frozen after it. Whatever the status, the repository does
 robustness, and it records the **object-entangled** character of the typographic
 shortcut effect (Section 9) as the reason global debiasing is insufficient while
 per-input neutralization can still repair failures.
+
+## Appendix P: Predictive CIC certificate (conditional, label-free abstention rule)
+
+This appendix records a **practical predictive reliability layer** on top of the CIC
+framework. It is **not** a new universal theorem and makes **no** claim of universal
+correctness; it is a *label-free abstention rule* for deciding when a CIC repair is
+reliable, and it is the property that the empirical predictive gate
+(`causal_reliability/analysis/predictive_cic_gate.py`,
+`results/predictive_cic_gate/`) is calibrated to track.
+
+**Proposition P (predictive CIC certificate, conditional).** Let `a` be the
+CIC-selected intervention for input `x`, let `ell(T_a(x))` be the repaired logits and
+`m_rep(x) = top1 - top2` their observed margin, and let `eps_hat` be a
+margin-quantile-calibrated upper bound on the residual-to-clean class imbalance of the
+calibrated perturbation class `A_cal` (Section on per-input class balance). If
+
+> `m_rep(x) > 2 * eps_hat`,
+
+then the repaired prediction is **stable** under `A_cal`: every perturbation in
+`A_cal` whose residual class imbalance is at most `eps_hat` leaves the repaired argmax
+unchanged. Equivalently, in the suggested wording: *if the repaired prediction margin
+exceeds an empirically calibrated residual-instability bound, then the repaired
+prediction is stable under the calibrated perturbation class. This does not prove
+universal correctness; it gives a label-free abstention rule for deciding when CIC
+repair is reliable.* Below the threshold the rule abstains.
+
+*Proof.* Any perturbation in `A_cal` changes the top-class score by at most `eps_hat`
+and can raise any competing class score by at most `eps_hat`, so the observed repaired
+margin `m_rep(x)` can shrink by at most `eps_hat + eps_hat = 2 * eps_hat`. If
+`m_rep(x) > 2 * eps_hat`, the margin stays strictly positive, no competitor can
+overtake the top class, and the repaired argmax is unchanged; below the threshold the
+rule abstains. ∎
+
+Proposition P is the calibrated, observable specialization of Lemma 3 of the
+finite-candidate theory (`recovery_certified_by_repaired_margin`): it substitutes an
+*empirically calibrated* bound `eps_hat` for the residual budget `eps_B` and reads the
+margin off the *observed* repaired logits, so it can be evaluated at inference time
+with no test label. The machine-checkable encoding is
+`causal_reliability/theory/predictive_certificate.py` (tested in
+`tests/test_predictive_cic_gate.py`); the empirical, multi-benchmark calibration and
+its conservative support flag `predictive_gate_supported` are in
+`results/predictive_cic_gate/predictive_gate_key_numbers.json`. The empirical gate
+generalizes the single-feature margin rule to a small set of label-free observable
+features and reports leave-one-benchmark-out and COCO-Text held-out performance
+separately, including the honest caveat that the rule does **not** transfer to the
+hardest COCO-Text strict/directional failure subsets.

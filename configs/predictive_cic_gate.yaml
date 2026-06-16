@@ -1,0 +1,95 @@
+# Predictive CIC reliability gate.
+#
+# Label-free, observable gate that predicts whether a CIC repair should be
+# trusted BEFORE looking at the true label. This is a PRACTICAL predictive
+# reliability layer on top of the existing CIC framework, NOT a new universal
+# theorem.
+#
+# Writes ONLY under results/predictive_cic_gate/. Never modifies any headline
+# metric, any existing support gate, any existing experiment result folder, or
+# results/final_report/. Re-runs no model: it consumes per-example artifacts that
+# the CIC experiments already wrote.
+
+base_dir: .
+results_dir: results
+output_subdir: predictive_cic_gate
+image_size: 224
+
+# Primary trust target (constructed AFTER features; never a model input).
+label_column: label_repair_success
+
+# Model used for the leave-one-benchmark-out protocol and out-of-fold scores.
+lobo_model: logistic_regression
+calibration_bins: 10
+
+# Conservative support-flag thresholds.
+min_lobo_auroc: 0.75
+min_accepted_precision: 0.80
+min_accepted_coverage: 0.25
+
+# COCO-Text reporting subsets (membership used ONLY for reporting, never features).
+triage:
+  strict_csv: results/coco_text_cic_triage/coco_text_verified_oracle_repairable_failures.csv
+  directional_csv: results/coco_text_cic_triage/coco_text_verified_directional_failures.csv
+
+# Per-example artifact sources. Each adapter reads only inference-time observable
+# fields; correctness/target/oracle columns are read ONLY to build eval labels.
+sources:
+  # ---- controlled benchmarks ----
+  - name: hard_multidecoy
+    kind: certificate
+    benchmark: hard_multidecoy
+    group: controlled
+    certificates: results/hard_multidecoy_clip_repair/hard_multidecoy_repair_certificates.csv
+    rankings: results/hard_multidecoy_clip_repair/hard_multidecoy_candidate_rankings.csv
+    cic_method: nonoracle_cic_top1_repair
+    consensus_method: nonoracle_cic_top3_repair
+
+  - name: scale_model_audit
+    kind: scale_audit
+    runs_dir: results/hard_multidecoy_scale_model_audit/runs
+    certificates_rel: hard_multidecoy_clip_repair/hard_multidecoy_repair_certificates.csv
+    rankings_rel: hard_multidecoy_clip_repair/hard_multidecoy_candidate_rankings.csv
+    cic_method: nonoracle_cic_top1_repair
+    consensus_method: nonoracle_cic_top3_repair
+    # exclude the run that duplicates the main hard_multidecoy model to avoid leakage
+    exclude_runs:
+      - ViT-B-32__laion2b_s34b_b79k
+
+  - name: semantic_decoy
+    kind: certificate
+    benchmark: semantic_decoy
+    group: controlled
+    certificates: results/semantic_decoy_scale_n128/semantic_decoy_pilot_certificates.csv
+    cic_method: cic_top1_region_repair
+    consensus_method: cic_top3_consensus_repair
+
+  # ---- natural-image benchmarks ----
+  - name: coco_text_full
+    kind: coco_full
+    benchmark: coco_text_full
+    group: natural
+    per_example: results/coco_text_cic_full/coco_text_full_per_example.csv
+    diagnostics: results/coco_text_cic_full/coco_text_full_proposal_diagnostics.csv
+    cic_method: cic_top1_repair_excl_ocr
+    consensus_method: cic_top3_repair_excl_ocr
+    provenance:
+      json: results/coco_text_cic_full/coco_text_full_key_numbers.json
+      fake_field: fake_backend
+      real_field: real_pretrained_model_loaded
+
+  - name: natural_text_open
+    kind: natural_open
+    benchmark: natural_text_open
+    group: natural
+    certificates: results/natural_text_open_proposal_cic/natural_text_certificates.csv
+    diagnostics: results/natural_text_open_proposal_cic/proposal_diagnostics.csv
+    cic_method: cic_top1_repair
+    consensus_method: cic_top3_repair
+
+  - name: natural_text_verified
+    kind: verified_failure
+    benchmark: natural_text_verified
+    group: natural
+    per_example: results/natural_text_verified_failure_eval/verified_failure_per_example.csv
+    diagnostics: results/natural_text_verified_failure_eval/verified_failure_proposal_diagnostics.csv

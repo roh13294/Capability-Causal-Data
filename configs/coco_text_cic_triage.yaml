@@ -1,0 +1,81 @@
+# Lightweight COCO-Text CIC triage pass.
+#
+# Purpose: decide whether the 500-image COCO-Text x COCO-objects metadata sample
+# (data/coco_text_cic/metadata.csv) contains enough real, oracle-repairable,
+# text-driven CLIP failures to justify a full proposal-CIC run.
+#
+# This pass uses ONLY global oracle text-box operators (gray fill, expanded gray
+# fill 1.25, Gaussian blur, expanded blur 1.25). It does NOT run open-proposal
+# CIC. It writes only under results/coco_text_cic_triage/ and never modifies any
+# final-report headline metric or curated Round-1 artifact.
+
+seed: 0
+prefer_gpu: false
+results_dir: results
+output_subdir: coco_text_cic_triage
+
+# Use all metadata rows by default; raise/cap for quick smoke runs.
+max_images: null
+
+# Original-prediction failure threshold.
+high_confidence_threshold: 0.7
+
+# Oracle text-box operators (global, label-free). Best operator per image is the
+# eval-only upper bound on simple text-box repair.
+oracle_operators:
+  - gray_fill
+  - expanded_gray_fill_1.25
+  - gaussian_blur
+  - expanded_blur_1.25
+
+# Directional verified-failure thresholds.
+prob_improve_eps: 0.01
+max_text_object_iou: 0.50
+
+# Basic ambiguity filters (applied to every image before it can be a failure).
+min_target_area_frac: 0.03
+max_target_area_frac: 0.90
+max_object_boxes: 8
+max_text_boxes: 12
+
+# Strict oracle-repairable thresholds.
+oracle_top_k: 5
+strong_pairwise_delta: 0.15
+
+# Cleaner subset filters.
+clean:
+  max_object_boxes: 3
+  max_text_boxes: 5
+  min_target_area_frac: 0.05
+  max_target_area_frac: 0.80
+  min_text_area_frac: 0.003
+  max_text_area_frac: 0.50
+  max_text_object_iou: 0.30
+  dominant_object_area_frac: 0.10
+  require_single_dominant: true
+
+# Contact sheet of sampled verified failures.
+n_contact_sheet: 50
+
+# Gate thresholds for coco_text_ready_for_full_cic.
+min_directional_failures: 50
+min_strict_failures: 30
+min_oracle_top5_or_pairwise_recovery: 50
+min_clean_examples: 30
+
+# Data loading: local folder mode over the curated COCO-Text metadata CSV.
+data:
+  root: data/coco_text_cic
+  metadata_csv: data/coco_text_cic/metadata.csv
+  image_size: 224
+  split: test
+
+# Real pretrained OpenCLIP is required. A `fake` backend is never treated as
+# evidence and forces coco_text_ready_for_full_cic = false.
+model:
+  preferred_backend: open_clip
+  model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+  allow_pretrained_download: false
+  device: auto

@@ -1,0 +1,22 @@
+data:
+  image_size: 224
+  metadata_csv: data/coco_text_cic/metadata.csv
+  root: data/coco_text_cic
+  split: test
+full_dir: results/coco_text_cic_full
+max_dilated_components: 12
+max_model_examples: null
+model:
+  allow_pretrained_download: false
+  device: auto
+  model_name: ViT-B-32
+  preferred_backend: open_clip
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+n_contact_examples: 6
+output_subdir: coco_text_cic_localization_diagnostic
+predict_batch_size: 64
+prefer_gpu: false
+results_dir: results
+seed: 0
+triage_dir: results/coco_text_cic_triage

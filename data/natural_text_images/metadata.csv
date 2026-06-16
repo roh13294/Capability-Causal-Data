@@ -1,0 +1,51 @@
+image_path,human_label,allowed_clip_labels,optional_text_boxes,optional_object_boxes,source,notes,split
+images/CNBC.jpg,news anchor,news anchor;person;news graphic;stock ticker;CNBC;television,,,curated,REVIEW: CNBC business-news screen; male anchor at left but the S&P 500 chart ticker numbers and 'BREAKING NEWS' text dominate more than the anchor and could act as a text shortcut,test
+images/adidasbp.jpeg,backpack,backpack;bag;school bag;adidas;logo,,,curated,Adidas backpack; large adidas logo/text could shortcut,test
+images/applelaptop.jpg,laptop,laptop;computer;macbook;apple;logo,,,curated,closed Apple MacBook laptop; apple logo could shortcut,test
+images/beats.jpeg,headphones,headphones;earphones;audio device;beats;logo,,,curated,Beats over-ear headphones; beats 'b' logo could shortcut,test
+images/bike_infront_target.jpg,bicycle,bicycle;bike;cargo bike;target;store;logo,,,curated,cargo bicycle parked in a Target lot; Target storefront sign in background could shortcut,test
+images/bleach.jpg,spray bottle,spray bottle;bottle;bleach;cleaner;clorox;logo,,,curated,Clorox Clean-Up spray bottle; 'KILLS COVID-19' and Clorox label text could shortcut,test
+images/breakingnews.jpg,news anchor,news anchor;person;news broadcast;news studio;breaking news;television,,,curated,TV news anchor at a desk; 'BREAKING NEWS' on-screen text could shortcut,test
+images/cartwalmart.jpeg,shopping cart,shopping cart;cart;trolley;walmart;store;logo,,,curated,shopping cart in a Walmart parking lot; Walmart storefront text could shortcut,test
+images/champs.jpg,basketball player,basketball player;athlete;person;NBA champions;trophy;banner,,,curated,NBA '2014 Champions / ON THIS DAY' social graphic; Spurs player holding a banner; heavy caption text could shortcut,test
+images/cocoshampoo.jpg,shampoo bottle,shampoo bottle;bottle;shampoo;head and shoulders;coconut;logo,,,curated,Head & Shoulders coconut shampoo bottle; brand text/logo could shortcut,test
+images/coke0.jpg,soda can,soda can;can;soda;coca cola;coke zero;logo,,,curated,Coca-Cola Zero Sugar can; Coca-Cola wordmark could shortcut,test
+images/dogpetsmart.jpeg,dog,dog;animal;puppy;petsmart;pet store;logo,,,curated,two dogs on leashes in front of a PetSmart store; PetSmart sign and caption text could shortcut,test
+images/doritosbag.jpeg,chip bag,chip bag;bag;chips;doritos;snack;logo,,,curated,Doritos Nacho Cheese chip bag; Doritos logo/text could shortcut,test
+images/fivestar.jpeg,notebook,notebook;spiral notebook;binder;five star;paper;logo,,,curated,Five Star spiral notebook; 'WIDE RULED / FIVE STAR' text could shortcut,test
+images/frostedflakes.jpg,cereal box,cereal box;box;cereal;frosted flakes;kelloggs;logo,,,curated,Kellogg's Frosted Flakes cereal box; Tony the Tiger mascot and brand text could shortcut,test
+images/gbotle.jpeg,sports drink bottle,sports drink bottle;water bottle;bottle;gatorade;squeeze bottle;logo,,,curated,Gatorade squeeze sports bottle; 'G' logo could shortcut,test
+images/helmet.jpg,hard hat,hard hat;helmet;safety helmet;construction;safety sign;hard hat required sign,,,curated,yellow hard hat beside a 'hard hat required' construction safety sign (German text) that could shortcut,test
+images/hot.jpg,chip bag,chip bag;bag;chips;cheetos;flamin hot;logo,,,curated,Cheetos Flamin' Hot Crunchy snack bag; Cheetos logo/text could shortcut,test
+images/hydroflask.jpeg,water bottle,water bottle;bottle;tumbler;flask;hydro flask;logo,,,curated,Hydro Flask insulated water bottle; 'Hydro Flask' text/logo could shortcut,test
+images/mcdonalds.jpeg,takeout bag,takeout bag;paper bag;bag;mcdonalds;golden arches;logo,,,curated,McDonald's takeout paper bag with golden arches; logo could shortcut,test
+images/meme1.jpg,person,person;man;drink;meme;caption;text,,,curated,Laughing Leo (Leonardo DiCaprio) meme holding a glass; large 'NEW YEAR RESOLUTIONS' caption could shortcut,test
+images/meme10.jpg,person,person;man;phone;meme;caption;text,,,curated,Pedro Pascal 'rereading my own post' meme holding a phone; caption text could shortcut,test
+images/meme2.jpg,cartoon character,cartoon character;cartoon;balloon;meme;caption;text,,,curated,'Running Away Balloon' cartoon meme; ME / WEEKEND / MONDAY caption text could shortcut,test
+images/meme3.jpg,cartoon character,cartoon character;spongebob;cartoon;meme;caption;text,,,curated,Mocking SpongeBob cartoon meme; Spider-Man 'responsibilities' caption text could shortcut,test
+images/meme4.jpg,cartoon character,cartoon character;gru;cartoon;meme;caption;text,,,curated,Gru's Plan cartoon meme; 'i dont have a girlfriend' caption text could shortcut,test
+images/meme5.jpg,person,person;man;face;meme;caption;text,,,curated,'What just happened?' reaction-face meme; caption text could shortcut,test
+images/meme6.jpg,person,person;woman;face;meme;caption;text,,,curated,scary-face 'scented candles' meme; large caption text could shortcut,test
+images/meme7.jpg,dog,dog;puppy;animal;meme;caption;text,,,curated,'Really?' skeptical puppy meme; 'Really?' caption text could shortcut,test
+images/meme8.jpg,cat,cat;kitten;animal;turtle;meme;caption,,,curated,'They see me rollin'' kitten-on-turtle meme; caption text could shortcut,test
+images/meme9.jpg,owl,owl;bird;animal;meme;caption;text,,,curated,wide-eyed owl 'I'm fine' anxiety meme; caption text could shortcut,test
+images/milkorganic.jpg,milk carton,milk carton;carton;milk;dairy;horizon organic;logo,,,curated,Horizon Organic grassfed whole milk carton; brand text/logo could shortcut,test
+images/movii.jpg,person,person;man;face;movie still;subtitle;film,,,curated,film still of a young man's face with subtitle 'To deny our own impulses ...' that could shortcut,test
+images/nikebox.jpg,shoe box,shoe box;box;cardboard box;nike;logo,,,curated,Nike shoe box; large NIKE swoosh logo/text could shortcut,test
+images/nikeswoosh.jpg,shoe,shoe;sneaker;running shoe;nike;swoosh;logo,,,curated,black-and-white Nike running shoe; swoosh logo could shortcut,test
+images/nodiving.jpg,sign,sign;warning sign;no diving sign;pool sign;swimming pool;safety sign,,,curated,'NO DIVING' sign at a pool edge; the warning text dominates and could shortcut,test
+images/northface.jpeg,jacket,jacket;coat;person;clothing;north face;logo,,,curated,man modeling a The North Face puffer jacket; 'The North Face' logo could shortcut,test
+images/pepsibottle.jpeg,soda bottle,soda bottle;bottle;soda;pepsi;plastic bottle;logo,,,curated,Pepsi soda bottle; Pepsi logo could shortcut,test
+images/psbox.jpeg,console box,console box;box;product box;playstation;ps5;logo,,,curated,PlayStation 5 retail box; 'PS5 / PlayStation' text and logo could shortcut,test
+images/schoolsign.jpg,sign,sign;road sign;school zone sign;speed limit sign;traffic sign;street sign,,,curated,'SCHOOL SPEED LIMIT 20' road sign; the sign text dominates and could shortcut,test
+images/sour.jpg,candy bag,candy bag;bag;candy;sour patch kids;snack;logo,,,curated,Sour Patch Kids candy bag; 'SOUR PATCH KIDS' text/logo could shortcut,test
+images/stairs.jpg,stairs,stairs;staircase;steps;stairway;caution sign,,,curated,indoor staircase with a yellow 'CAUTION WATCH YOUR STEP' floor sign that could shortcut,test
+images/starbucks.jpeg,coffee cup,coffee cup;cup;reusable cup;starbucks;mug;logo,,,curated,Starbucks reusable cup; siren logo and 'Reusable Recyclable' text could shortcut,test
+images/supremecase.jpeg,phone case,phone case;case;phone;supreme;smartphone;logo,,,curated,Supreme phone case on a smartphone; 'Supreme' box-logo text could shortcut,test
+images/tesla.jpeg,car,car;vehicle;electric car;tesla;automobile;logo,,,curated,front of a red Tesla car; Tesla 'T' logo could shortcut,test
+images/tidebottl.jpg,detergent bottle,detergent bottle;bottle;detergent;tide;laundry detergent;logo,,,curated,Tide laundry detergent bottle; 'Tide' logo/text could shortcut,test
+images/toothpastebox.jpeg,toothpaste box,toothpaste box;box;carton;toothpaste;colgate;logo,,,curated,Colgate toothpaste box; 'Colgate' text/logo could shortcut,test
+images/treesubway.jpeg,storefront,storefront;building;shop front;tree;subway;logo,,,curated,Subway sandwich-shop storefront with a tree in front; 'SUBWAY / OPEN' signage could shortcut,test
+images/truckfedex.jpeg,truck,truck;delivery truck;vehicle;van;fedex;logo,,,curated,FedEx delivery truck in front of a FedEx Office store; 'FedEx' logo/text could shortcut,test
+images/wetfloor.jpg,safety cone,safety cone;caution cone;wet floor sign;mop;warning sign;sign,,,curated,yellow 'CAUTION WET FLOOR' cone beside a mop and bucket; warning text could shortcut,test
+images/xbox.jpg,game controller,game controller;controller;gamepad;xbox;console;logo,,,curated,white Xbox wireless controller; Xbox logo could shortcut,test

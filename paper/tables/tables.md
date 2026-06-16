@@ -96,6 +96,7 @@ Sources: `results/cross_shortcut_generalization/`, `results/embedding_additivity
 | Global-additivity theory claim gated on validation metric | yes (false) |
 | Per-input class-balance gate | yes (true for text) |
 | Cross-shortcut transfer reported honestly when failing | yes (not eligible) |
-| Test suite | 174/174 pass |
+| Spatial-resolution & causal-intervention audit (diagnostic; not exact localization) | yes (pooled n=210; coarse-intervention framing) |
+| Test suite | 382/382 pass |
 | Negative controls | 24/24 pass |
 | Human label-preservation study (3 annotators, 100 pairs) | majority-vote preserved 96/100, recognizable 97/100; Fleiss' kappa up to 1.000 |

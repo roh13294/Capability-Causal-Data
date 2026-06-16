@@ -11,3 +11,5 @@ data/wilds/
 __pycache__/
 .pytest_cache/
 .DS_Store
+
+data/coco_text_cic/raw/

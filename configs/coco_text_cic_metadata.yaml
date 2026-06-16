@@ -1,0 +1,75 @@
+# Build the COCO-Text x COCO-objects metadata CSV for the natural-text CIC.
+#
+# Joins locally-present COCO 2014 train object annotations
+# (annotations/instances_train2014.json) with COCO-Text v2 (cocotext.v2.json)
+# by image_id and writes data/coco_text_cic/metadata.csv (the `local` adapter
+# schema). It does NOT run CLIP/CIC and writes nothing under results/.
+#
+# Images always load from raw/train2014/ (NOT val2017/, whose COCO-Text overlap
+# is zero). Among joined+filtered images, COCO-Text set == "val" is preferred.
+
+prefer_set: val
+image_path_prefix: raw/train2014
+
+filters:
+  # Allowed object categories (the visual human_label / content). "person" is
+  # excluded on purpose. Comment out to use the builder default set.
+  allowed_categories:
+    - bird
+    - cat
+    - dog
+    - horse
+    - sheep
+    - cow
+    - elephant
+    - bear
+    - zebra
+    - giraffe
+    - bicycle
+    - car
+    - motorcycle
+    - airplane
+    - bus
+    - train
+    - truck
+    - boat
+    - banana
+    - apple
+    - sandwich
+    - orange
+    - broccoli
+    - carrot
+    - hot dog
+    - pizza
+    - donut
+    - cake
+    - bottle
+    - cup
+    - laptop
+    - cell phone
+    - clock
+    - vase
+    - teddy bear
+    - umbrella
+    - backpack
+    - suitcase
+
+  # Text quality.
+  require_legible: true
+  require_english: true
+
+  # Object (content) box must cover at least this fraction of the image.
+  min_object_area_frac: 0.05
+
+  # Text box size: fraction of image area AND minimum px per side.
+  min_text_area_frac: 0.002
+  min_text_box_px: 8
+
+  # Reject a text box if more than this fraction of it sits inside the dominant
+  # object box (we want text separable from the content).
+  max_text_object_overlap: 0.5
+
+  # "Not too many dominant objects": count allowed-category objects whose area
+  # fraction >= dominant_object_area_frac; require <= max_dominant_objects.
+  dominant_object_area_frac: 0.10
+  max_dominant_objects: 2

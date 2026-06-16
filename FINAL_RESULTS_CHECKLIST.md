@@ -1,5 +1,42 @@
 # Final Results Checklist
 
+> **This file's "Archived Earlier Phase Checklist" section records an earlier phase-specific
+> checklist (a 42-test snapshot) and must not be read as the current final validation state.**
+> The authoritative current final validation state is in
+> [`FINAL_ARTIFACT_INDEX.md`](FINAL_ARTIFACT_INDEX.md) and
+> [`results/final_report/final_key_numbers.json`](results/final_report/final_key_numbers.json).
+
+## Current Final Validation State
+
+- **Full test suite:** 382 passed (`python3 -m pytest`).
+- **Primary headline (unchanged):** text-overlay hard multi-decoy, misleading accuracy
+  0.250 → 0.750 vs. 0.331 matched random text-region repair, clean-safe accuracy drop 0.010.
+  Source: `results/final_report/final_key_numbers.json`.
+- **Scale / multi-model replication audit (supporting):** n_per_condition = 128, 4/4 real
+  pretrained OpenCLIP models loaded and repair-eligible on one shared resampled benchmark
+  instance whose hash differs from the n=32 headline.
+- **Second shortcut family — semantic-decoy icon (core supporting validation):** n=64 and
+  n=128 both pass all 8 strict gates (`semantic_decoy_eligible = true`,
+  `semantic_decoy_include_in_headline = false`).
+- **Spatial-resolution and causal-intervention audit (supporting diagnostic):** pooled
+  n=210, median IoU 0.39, IoU ≥ 0.3 in 0.73, IoU ≥ 0.5 in 0.43, shortcut coverage ≥ 0.5 in
+  0.77; CIC is a coarse causal-intervention method, not an exact localization or
+  segmentation method, and exact localization remains a limitation.
+- **Human label-preservation validation:** 3 annotators, 100 pairs; 96/100 label preserved,
+  97/100 recognizable; Fleiss' κ = 0.973 / 0.974 / 0.920 / 1.000.
+- **WILDS Waterbirds:** real spurious-background diagnostic only; no CIC repair was run.
+- **Watermark cross-shortcut transfer:** negative boundary result (not eligible).
+- **Scope:** no claim of open-world shortcut discovery, exact localization, general
+  robustness, or universal shortcut repair.
+
+---
+
+# Archived Earlier Phase Checklist
+
+> **Historical, phase-specific snapshot — NOT the current final validation state.** The
+> "42 tests passed" count below reflects an earlier phase-7 run and is superseded by the
+> 382-test current state above. Retained only for historical context.
+
 ## Commands Used
 
 - `bash scripts/run_phase7.sh`
@@ -10,7 +47,8 @@ The direct `pytest` executable was not on PATH, so tests were run with `python3 
 ## Test Status
 
 - Phase 7 validation/regeneration command: passed.
-- Full test suite: passed, 42 tests passed, 16 warnings.
+- Full test suite: passed, 42 tests passed, 16 warnings. *(Historical phase-7 count;
+  current suite is 382 passed — see Current Final Validation State above.)*
 
 ## Seed Counts
 

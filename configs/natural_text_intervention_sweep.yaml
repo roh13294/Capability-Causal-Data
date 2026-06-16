@@ -1,0 +1,44 @@
+# Natural-text intervention/operator sweep (DIAGNOSTIC).
+#
+# Diagnoses whether strict natural-text repair is limited by the intervention
+# operator / masking strategy rather than by CIC proposal selection. It writes
+# ONLY to results/natural_text_intervention_sweep/, never updates the headline /
+# final-report metrics, and keeps open_world_claim_allowed = false.
+#
+# Proposal settings MIRROR configs/natural_text_open_proposal_cic.yaml so the CIC
+# top-1 region per verified failure is identical to the headline verified-failure
+# run.
+
+seed: 0
+prefer_gpu: false
+results_dir: results
+output_subdir: natural_text_intervention_sweep
+
+# Candidate proposal settings (must match the verified-failure run to reproduce
+# the same CIC top-1 selection).
+max_candidates: 64
+grid_scales: [0.18, 0.30, 0.45]
+enable_object_box_family: false
+
+# Example-level thresholds.
+high_confidence_threshold: 0.7
+n_example_visualizations: 4
+
+data:
+  mode: local
+  image_size: 224
+  split: test
+  local:
+    root: data/natural_text_images
+  verified:
+    root: data/natural_text_images
+    annotations_csv: data/natural_text_images/verified_annotations.csv
+
+# Real pretrained OpenCLIP is required; a `fake` backend is never evidence.
+model:
+  preferred_backend: open_clip
+  model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+  allow_pretrained_download: false
+  device: auto

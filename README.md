@@ -110,7 +110,7 @@ The dangerous quadrant is not merely low confidence. It is the high-confidence, 
 - `real_model_validation`: controlled shortcut images evaluated with a real pretrained vision or vision-language model when available. If CLIP or pretrained torchvision weights are unavailable, the code falls back to explicitly marked non-pretrained/local modes; those fallback results are not headline pretrained evidence.
 - `real_text_shortcut`: a real review-like text classification sample with neutral source-marker shortcut injection. The checked-in default is a small reproducible sample, not a large benchmark.
 - `random_aug_failure`: a localized metadata shortcut stress test where generic random text perturbations can miss the factor that CIC targets directly.
-- `traffic_sign_shortcut`: an optional safety-critical-inspired traffic-sign shortcut audit. If GTSRB is unavailable or disabled, the runner writes an unavailable summary and does not claim real dataset validation.
+- `traffic_sign_shortcut`: an optional safety-critical-inspired traffic-sign shortcut evaluation. If GTSRB is unavailable or disabled, the runner writes an unavailable summary and does not claim real dataset validation.
 - `text`: rule-based token classification where shortcut words shift.
 - `tabular`: semi-synthetic proxy benchmark inspired by health, finance, and education settings.
 
@@ -168,11 +168,15 @@ The main hard multi-decoy result is a strong single-benchmark result. A previous
 
 This does not solve open-world shortcut discovery. The method searches a finite candidate class of text-region proposals. Localization is strongest at coarse IoU >= 0.3 and weak at strict IoU >= 0.5, so the result should be interpreted as coarse causal-region localization and repair, not exact bounding-box recovery.
 
+#### Spatial-resolution and causal-intervention audit
+
+To address the low exact-IoU criticism directly, a dedicated audit (`python3 -m causal_reliability.experiments.run_spatial_resolution_audit --config configs/spatial_resolution_audit.yaml`, outputs under `results/spatial_resolution_audit/`) separates *exact box precision* from *causal-intervention usefulness* across the hard multi-decoy, failure-conditioned, and semantic-decoy (n=128) benchmarks (210 shortcut examples pooled). Exact precision is low — median IoU 0.39, hit@IoU0.5 = 0.43 — yet the selected regions cover the shortcut evidence (shortcut-coverage >= 0.5 in 77% of cases, >= 0.8 in 71%, any intersection in 90%) while being spatially blunt (median selected area ≈ 2.1× the oracle shortcut box). Repair tracks coarse localization rather than exact boxes: top-1 repair is 0.78 overall and rises monotonically by IoU bucket (0.26 at IoU < 0.1 to 1.00 at IoU >= 0.5), and clean-safe repair stays at 0.80 with non-trivial object overlap (median object IoU 0.20), so the intervention preserves causal content. A non-oracle refinement diagnostic (geometric shrink/split/shift variants re-scored using only pixels, candidate boxes, and model probabilities — never the oracle box, label, or correctness) did **not** improve median IoU or the IoU >= 0.5 rate and is reported honestly as such. Read together: **CIC is a coarse causal-intervention method, not an exact localization or segmentation method**, and exact localization remains a limitation. The semantic-decoy benchmark has no oracle shortcut box or object box on disk, so its coverage and object-overlap metrics are reported as n/a rather than fabricated. Artifacts: [`results/spatial_resolution_audit/spatial_resolution_summary.md`](results/spatial_resolution_audit/spatial_resolution_summary.md), `spatial_resolution_key_numbers.json`, `spatial_resolution_metrics.csv`, `spatial_resolution_by_bucket.csv`, `spatial_resolution_plot.png`; runner [`causal_reliability/experiments/run_spatial_resolution_audit.py`](causal_reliability/experiments/run_spatial_resolution_audit.py), config [`configs/spatial_resolution_audit.yaml`](configs/spatial_resolution_audit.yaml), tests [`tests/test_spatial_resolution_audit.py`](tests/test_spatial_resolution_audit.py).
+
 CLIP repair evidence should be read as a ladder: oracle CLIP repair is upper-bound causal confirmation; single-overlay non-oracle repair is promising but has a competitive matched/random patch baseline; the first multi-decoy repair is not a true shortcut-failure benchmark because original misleading accuracy was high; hard multi-decoy repair is the main headline result.
 
 ### Scale and Multi-Model Replication Audit
 
-As supporting evidence (this does **not** replace the frozen primary headline, which remains ViT-B-32 / laion2b_s34b_b79k at n=32 per condition: misleading 0.250 → CIC top-1 0.750 vs. 0.331 matched random, clean-safe drop 0.010), a scale-and-multi-model replication audit re-ran the hard multi-decoy text-overlay benchmark at n_per_condition = 128 across four real pretrained OpenCLIP backbone/checkpoint pairs. All 4/4 model/checkpoint pairs loaded (0 skipped, no fake backend) and all four were `repair_eligible`; the test suite passes (186 tests). All four models were evaluated on the **same** larger resampled benchmark instance (one shared benchmark hash) for a fair cross-model comparison, and this benchmark hash differs from the n=32 headline benchmark, so these numbers are a separate larger-n replication and are not a cell-for-cell restatement of the headline.
+As supporting evidence (this does **not** replace the frozen primary headline, which remains ViT-B-32 / laion2b_s34b_b79k at n=32 per condition: misleading 0.250 → CIC top-1 0.750 vs. 0.331 matched random, clean-safe drop 0.010), a scale-and-multi-model replication audit re-ran the hard multi-decoy text-overlay benchmark at n_per_condition = 128 across four real pretrained OpenCLIP backbone/checkpoint pairs. All 4/4 model/checkpoint pairs loaded (0 skipped, no fake backend) and all four were `repair_eligible`; the test suite passes (382 tests). All four models were evaluated on the **same** larger resampled benchmark instance (one shared benchmark hash) for a fair cross-model comparison, and this benchmark hash differs from the n=32 headline benchmark, so these numbers are a separate larger-n replication and are not a cell-for-cell restatement of the headline.
 
 | Model | Pretrained tag | Original misleading | CIC top-1 | Matched random | CIC − random gap | Clean-safe drop | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -238,7 +242,7 @@ Final scoped repair claim: CIC-guided repair is a proof-of-concept. The stronger
 
 Final scoped claim: confidence measures uncertainty. Counterfactual stability measures shortcut dependence. CIC complements confidence by detecting high-confidence shortcut failures when label-preserving shortcut interventions are available, hypothesized, or discovered from a finite candidate set.
 
-Related work positioning is summarized in `docs/related_work.md`. This project does not claim shortcut learning or counterfactual invariance are new; the contribution is an operational per-example reliability certificate, a two-axis reliability plane, baseline-tested shortcut-failure regimes, and an audit/repair workflow for candidate shortcut interventions.
+Related work positioning is summarized in `docs/related_work.md`. This project does not claim shortcut learning or counterfactual invariance are new; the contribution is an operational per-example reliability certificate, a two-axis reliability plane, baseline-tested shortcut-failure regimes, and a finite-candidate counterfactual intervention and repair framework for candidate shortcut interventions.
 
 ## Theory and Mechanism Validation
 
@@ -324,7 +328,7 @@ WILDS Waterbirds was also parsed as a real spurious-background diagnostic (11,78
 
 ## Safety-Critical-Inspired Traffic Sign Audit
 
-The traffic-sign runner is optional and conservative. It prefers GTSRB only when explicitly enabled and available; otherwise it writes `results/traffic_sign_shortcut/traffic_sign_summary.md` explaining that the validation is unavailable. This experiment is a safety-critical-inspired shortcut audit. It does not validate deployment in autonomous vehicles.
+The traffic-sign runner is optional and conservative. It prefers GTSRB only when explicitly enabled and available; otherwise it writes `results/traffic_sign_shortcut/traffic_sign_summary.md` explaining that the validation is unavailable. This experiment is a safety-critical-inspired shortcut evaluation. It does not validate deployment in autonomous vehicles.
 
 ## Regenerated Waterbirds-Style Spurious-Background Pilot
 

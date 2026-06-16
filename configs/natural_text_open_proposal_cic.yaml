@@ -1,0 +1,58 @@
+# Natural-image validation of shortcut-agnostic, proposal-based CIC.
+#
+# This is an open-candidate intervention search: candidate regions are generated
+# without a pre-specified shortcut family. It is NOT full open-world discovery;
+# open_world_claim_allowed is always false in the outputs.
+
+seed: 0
+prefer_gpu: false
+results_dir: results
+output_subdir: natural_text_open_proposal_cic
+
+# Candidate proposal settings.
+max_candidates: 64
+grid_scales: [0.18, 0.30, 0.45]
+enable_object_box_family: false   # object boxes are eval-only by default
+
+# Example-level thresholds.
+high_confidence_threshold: 0.7
+n_example_visualizations: 6
+
+# Open-proposal claim gate.
+min_images: 30                    # n must be at least this to support the claim
+min_cic_random_gap: 0.15          # CIC top-1 must beat matched random by this much
+max_content_preservation_drop: 0.10
+
+# Data loading. Default is the local natural-image folder; switch mode to
+# `synthetic` for a dependency-free smoke run, or to a public-dataset adapter
+# (textocr / coco_text / open_images) when local annotation files are present.
+data:
+  mode: local
+  image_size: 224
+  split: test
+  local:
+    root: data/natural_text_images
+    metadata_csv: data/natural_text_images/metadata.csv
+  synthetic:
+    n_images: 36
+    size: 96
+    seed: 0
+  textocr:
+    metadata_json: data/textocr/natural_text_open_proposal.json
+    image_root: data/textocr/images
+  coco_text:
+    metadata_json: data/coco_text/natural_text_open_proposal.json
+    image_root: data/coco_text/images
+  open_images:
+    metadata_json: data/open_images/natural_text_open_proposal.json
+    image_root: data/open_images/images
+
+# Real pretrained OpenCLIP is required for the claim. A `fake` backend is never
+# treated as evidence.
+model:
+  preferred_backend: open_clip
+  model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+  allow_pretrained_download: false
+  device: auto

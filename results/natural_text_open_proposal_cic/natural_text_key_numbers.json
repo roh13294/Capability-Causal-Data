@@ -1,0 +1,51 @@
+{
+  "n_images": 50,
+  "original_clip_accuracy": 0.12,
+  "high_confidence_failure_rate": 0.74,
+  "cic_top1_repair_accuracy": 0.2,
+  "cic_top3_repair_accuracy": 0.22,
+  "matched_random_proposal_repair_accuracy": 0.18,
+  "largest_region_repair_accuracy": 0.2,
+  "ocr_only_proposal_repair_accuracy": null,
+  "oracle_text_box_repair_accuracy": null,
+  "cic_random_gap": 0.020000000000000018,
+  "content_preservation_rate": 0.3333333333333333,
+  "content_preservation_drop": 0.6666666666666667,
+  "mean_selected_region_area_fraction": 0.06363042091836733,
+  "selected_overlaps_text_box_rate": 0.0,
+  "selected_overlaps_object_box_rate": 0.0,
+  "backend": "open_clip",
+  "model_name": "ViT-B-32",
+  "pretrained_loaded": true,
+  "candidate_families_present": [
+    "connected_component",
+    "edge_dense",
+    "grid_patch",
+    "high_contrast",
+    "random_patch"
+  ],
+  "non_ocr_family_present": true,
+  "no_oracle_leakage": true,
+  "min_images": 30,
+  "min_cic_random_gap": 0.15,
+  "max_content_preservation_drop": 0.1,
+  "open_proposal_supported": false,
+  "open_proposal_support_reasons": [
+    "CIC top-1 does not beat matched random by >= 0.15 (gap=0.020)",
+    "content-preservation drop 0.667 > 0.10"
+  ],
+  "open_world_claim_allowed": false,
+  "preferred_wording": [
+    "shortcut-agnostic proposal-based CIC",
+    "open-candidate intervention search",
+    "natural-image validation",
+    "does not require a pre-specified shortcut family, but still depends on candidate region proposals"
+  ],
+  "forbidden_wording": [
+    "fully open-world shortcut discovery",
+    "solves shortcut discovery",
+    "general robustness",
+    "universal repair",
+    "deployment-ready"
+  ]
+}

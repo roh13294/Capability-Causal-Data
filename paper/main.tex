@@ -14,16 +14,18 @@
 \captionsetup{font=small,labelfont=bf}
 
 \newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
 \newtheorem{corollary}{Corollary}
 \newtheorem{assumption}{Assumption}
+\newtheorem{definition}{Definition}
 
 \newcommand{\argmax}{\operatorname*{arg\,max}}
 \newcommand{\note}[1]{\textcolor{gray}{#1}}
 
 \title{\textbf{Beyond Confidence: Counterfactual Stability as a Second Axis
 of Neural Network Reliability}\\[0.4em]
-\large Finite-Candidate Shortcut Audit and Repair in Pretrained
-Vision--Language Models}
+\large A Finite-Candidate Intervention Framework for Detecting and Repairing
+Shortcut-Dependent Predictions in Pretrained Vision--Language Models}
 
 \author{Rohan Nagaram}
 \date{\today}
@@ -33,43 +35,50 @@ Vision--Language Models}
 
 \begin{abstract}
 \noindent
-Confidence is the default signal practitioners use to decide whether to trust a
-neural network's prediction. But confidence alone cannot distinguish genuine
-uncertainty from \emph{shortcut dependence}: a model can be confidently right for
-the wrong reason, relying on a spurious feature that happens to correlate with the
-label. We study \emph{Counterfactual Instability Certificates} (CIC), a per-example
-signal that measures how much a prediction changes under \emph{label-preserving}
-interventions on a finite candidate set of hypothesized shortcuts. CIC is not a
-replacement for confidence; it is a second, orthogonal axis of reliability.
+Confidence measures how sure a model is, but not whether its certainty rests on
+causal evidence. This paper proposes \emph{counterfactual stability} as a second
+reliability axis and operationalizes it through \emph{Counterfactual Instability
+Certificates} (CIC), a finite-candidate intervention framework for detecting and
+repairing shortcut-dependent predictions. A \emph{shortcut} is a spurious feature
+that correlates with the label but is not what actually defines it, and a model can
+be confidently right for the wrong reason by leaning on one --- exactly the
+high-confidence failure a confidence-only monitor misses. CIC scores, per example,
+whether a prediction stays put when a hypothesized shortcut is changed while the
+label-defining content is held fixed. It tests a \emph{finite, supplied candidate
+set} of label-preserving interventions; it complements rather than replaces
+confidence, and it does not search for unknown shortcuts.
 
-Our main empirical results are on real pretrained OpenCLIP (\texttt{ViT-B-32},
-\texttt{laion2b\_s34b\_b79k}; no fake backend used for any headline evidence).
-On a held-out hard multi-decoy text-overlay benchmark, misleading text reduces
-accuracy from near-perfect clean/aligned performance to $25.0\%$. Non-oracle CIC
-region scoring repairs accuracy to $75.0\%$, versus $33.1\%$ for a matched random
-text-region control, while keeping the clean-safe accuracy drop to $1.0\%$. A
-\emph{full benchmark-resampling audit} over three independently regenerated
-benchmark instances (with distinct image and metadata hashes) reproduces the
-effect: CIC's advantage over the matched random control ranges $0.39$--$0.54$
-(mean $0.46$) with a mean clean drop of $\approx 0.01$. In a
-\emph{failure-conditioned} evaluation on $50$ verified shortcut failures (where
-original accuracy is $0$ by construction), CIC repairs $96$--$98\%$ of cases
-versus $\approx 11.2\%$ for matched random text repair.
+Our primary benchmark is text-overlay shortcuts on real pretrained OpenCLIP
+(\texttt{ViT-B-32}~/~\texttt{laion2b\_s34b\_b79k}; no fake backend for any
+headline). On a frozen, held-out hard multi-decoy benchmark ($n=32$ per condition),
+misleading text drops accuracy from near-perfect to $0.250$; non-oracle CIC region
+scoring repairs it to $0.750$ versus $0.331$ for a matched random text-region
+control, while the clean-safe accuracy drop is only $0.010$. The effect survives a
+full benchmark-resampling audit and a failure-conditioned evaluation, and a
+supporting scale/multi-model audit at $n=128$ reproduces it on \textbf{all four}
+real pretrained OpenCLIP backbone/checkpoint pairs attempted (all repair-eligible;
+CIC$-$random gaps $0.437$--$0.778$).
 
-On theory, the \emph{global} input-independent embedding-additivity assumption is
-\textbf{not} supported for OpenCLIP text overlays --- the per-image shortcut shift
-clusters more tightly by object class than by shortcut value. The weaker
-\emph{residual-to-clean}, per-input class-balance premise is supported most clearly
-for oracle neutralization and directionally for CIC-selected regions, making the
-recovery theorem a plausible but conservative mechanism account for text-overlay
-repair. We retain a clear negative boundary: the frozen
-text-selected policy did \textbf{not} transfer to a non-text colored-symbol
-watermark shortcut. The scope is strictly finite-candidate interventions: this work
-makes no claim of open-world shortcut discovery, exact bounding-box localization,
-general robustness, or cross-shortcut generalization.
+A second, non-text shortcut family shows the method is not text-specific:
+\emph{semantic-decoy icons} (a central true-class icon plus a competing-class
+corner icon, with \emph{no written words anywhere}) pass all eight strict gates at
+both $n=64$ and $n=128$. At $n=128$, the decoy drops accuracy to $0.297$ while CIC
+top-1 repair reaches $0.711$ versus $0.258$ matched random (gap $0.453$, clean-safe
+drop $0.008$). A pooled spatial audit ($n=210$) fixes the method's resolution
+honestly: exact localization remains limited (median IoU $0.39$ with the oracle
+shortcut box), but selected regions intersect the shortcut in $90\%$ of cases and
+cover at least half of it in $77\%$ --- so CIC is a \emph{coarse causal-intervention}
+method, not a segmentation method.
+
+The scope is deliberately bounded. CIC intervenes on and repairs a supplied finite
+family of shortcut interventions; it makes \textbf{no} claim of open-world shortcut
+discovery, exact bounding-box localization, general robustness, or
+cross-shortcut transfer/universal repair (the frozen text policy does not transfer
+to a weak-channel watermark shortcut). On theory, the strong \emph{global}
+input-independent embedding-additivity assumption fails for OpenCLIP text overlays
+--- the per-image shift is object-entangled --- but the weaker per-input
+class-balance premise the recovery theorem actually needs is supported.
 \end{abstract}
-
-\tableofcontents
 
 % =====================================================================
 \section{Introduction}
@@ -97,16 +106,24 @@ We argue that confidence and counterfactual stability are two axes of a
 \emph{reliability plane}, and that the most dangerous quadrant --- high confidence,
 low stability --- is exactly the one confidence cannot police.
 
+This work contributes a reliability framework, not merely a benchmark evaluation: it
+defines counterfactual stability as an operational reliability axis, implements it as
+a per-example intervention score, and tests whether finite-candidate shortcut
+interventions can repair high-confidence shortcut failures in real pretrained
+vision--language models.
+
 \paragraph{Contributions and honest scope.}
 \begin{enumerate}[leftmargin=1.4em,itemsep=2pt]
-\item A per-example, model-agnostic reliability signal (CIC) and a two-axis
-reliability plane that separates uncertainty from shortcut dependence
+\item A reliability framework: counterfactual stability as a second axis beyond
+confidence, with CIC as a per-example finite-candidate intervention score
 (Sections~\ref{sec:cic}--\ref{sec:plane}).
-\item A real-pretrained-OpenCLIP hard multi-decoy benchmark with a non-oracle
-finite-candidate audit-and-repair workflow, plus a full benchmark-resampling audit,
-a failure-conditioned evaluation, and a second controlled shortcut family (a
-non-text semantic-decoy icon) on which the same method passes all gates at $n=64$
-and $n=128$ as supporting evidence (Sections~\ref{sec:design}--\ref{sec:results}).
+\item An intervention-and-repair method for shortcut-dependent predictions in fixed
+pretrained VLMs, evaluated on controlled text-overlay and non-text semantic-decoy
+shortcut families. On a real-pretrained-OpenCLIP hard multi-decoy benchmark the
+non-oracle finite-candidate method is corroborated by a full benchmark-resampling
+audit, a failure-conditioned evaluation, and a second controlled shortcut family
+(a non-text semantic-decoy icon) on which the same method passes all gates at $n=64$
+and $n=128$ (Sections~\ref{sec:design}--\ref{sec:results}).
 \item A conditional, finite-candidate recovery theory, gated on \emph{measured}
 validation metrics: the strong global-additivity form fails for CLIP, but the
 weaker per-input class-balance premise the theorem needs is supported
@@ -114,9 +131,20 @@ weaker per-input class-balance premise the theorem needs is supported
 \item Retained negative results: no cross-shortcut transfer to watermarks; no exact
 localization; no general robustness (Section~\ref{sec:negative}).
 \end{enumerate}
-The framework is a finite-candidate \emph{audit-and-repair} tool. It is
-\textbf{not} open-world shortcut discovery, \textbf{not} exact localization, and
-\textbf{not} a general robustness method.
+\paragraph{Scope (read once, applies throughout).}
+\begin{center}
+\fbox{\begin{minipage}{0.95\linewidth}
+\small
+CIC is a finite-candidate counterfactual intervention framework. It tests whether
+predictions are stable under a \emph{supplied} family of label-preserving shortcut
+interventions, and repairs those that are not. It
+does \textbf{not} discover arbitrary unknown shortcuts, produce pixel-perfect boxes,
+prove general robustness, or guarantee transfer to unrelated shortcut families.
+\end{minipage}}
+\end{center}
+\noindent To keep the prose readable, this scope statement is not repeated in full at
+every result; caveats are restated only where a specific table or number could be
+misread.
 
 \paragraph{Final claims at a glance.}
 \begin{center}
@@ -124,25 +152,34 @@ The framework is a finite-candidate \emph{audit-and-repair} tool. It is
 \small
 \textbf{Supported claims.}
 \begin{enumerate}[leftmargin=1.6em,itemsep=1pt,topsep=2pt]
-\item CIC is a second axis of reliability, complementary to confidence.
+\item CIC is a second reliability axis, complementary to confidence.
 \item In finite-candidate text-region settings, non-oracle CIC repair substantially
 outperforms matched random controls on real pretrained OpenCLIP
 ($0.250\to0.750$ vs.\ $0.331$ matched random).
-\item The result survives a full benchmark-resampling audit (CIC$-$random gap
-$0.39$--$0.54$, mean $0.46$; clean drop $\approx 0.01$).
+\item The text-overlay effect survives a full benchmark-resampling audit
+(CIC$-$random gap $0.39$--$0.54$, mean $0.46$; clean drop $\approx 0.01$).
+\item The text-overlay effect replicates at $n=128$ across $4$ real pretrained
+OpenCLIP backbones/checkpoints (all repair-eligible; CIC$-$random gaps
+$0.437$--$0.778$).
+\item CIC also succeeds on a second controlled finite-candidate shortcut family ---
+non-text semantic-decoy icons --- passing all gates at $n=64$ and $n=128$
+($0.297\to0.711$ vs.\ $0.258$ matched random at $n=128$).
 \item On verified failure-conditioned examples (original accuracy $0$ by
-construction), CIC repairs most failures ($0.96/0.98$), but the subset is selected
-by failure.
+construction), CIC repairs most failures ($0.96/0.98$); the subset is strong but
+selected by failure.
 \item The theory is supported through per-input class-balance, not global
 additivity.
-\item Cross-shortcut transfer to a colored-symbol watermark shortcut failed.
+\item The spatial audit shows CIC is coarse but causally useful (regions cover the
+shortcut and drive repair); exact localization remains limited.
+\item Cross-shortcut frozen transfer to a colored-symbol watermark shortcut failed.
 \end{enumerate}
 \textbf{Unsupported (explicitly \emph{not} claimed).}
 \begin{enumerate}[leftmargin=1.6em,itemsep=1pt,topsep=2pt]
 \item Open-world shortcut discovery.
-\item Exact bounding-box localization.
+\item Exact bounding-box localization / segmentation.
 \item General robustness.
-\item Cross-shortcut generalization.
+\item Cross-shortcut transfer.
+\item Universal shortcut repair.
 \end{enumerate}
 \end{minipage}}
 \end{center}
@@ -150,60 +187,43 @@ additivity.
 % =====================================================================
 \section{Background and Related Work}\label{sec:related}
 % =====================================================================
-This project does not claim to invent shortcut learning, spurious correlations, or
-counterfactual invariance. Its contribution is an operational per-example
-reliability certificate, a two-axis plane, baseline-tested shortcut-failure
-regimes, and a finite-candidate audit/repair workflow.
-
-\paragraph{Shortcut learning and spurious correlations.}
-Shortcut learning is a well-documented failure mode: models exploit background,
-texture, source, or annotation artifacts that correlate with labels in one
-environment and fail under shift~\cite{geirhos2020shortcut}. Benchmarks such as
-Colored MNIST, Waterbirds, and CelebA attribute shifts separate a stable label
-feature from a correlated nuisance feature, and overparameterization can exacerbate
-reliance on the spurious feature~\cite{sagawa2020investigation}.
-
-\paragraph{Robust optimization.}
-Group DRO~\cite{sagawa2020groupdro} and IRM~\cite{arjovsky2019irm} target invariance
-or worst-group robustness \emph{during training}, typically requiring group labels
-or multiple environments. CIC is instead a \emph{diagnostic and audit} signal that
-applies to a fixed, pretrained model when candidate interventions are available; it
-does not require retraining.
-
-\paragraph{Counterfactual invariance and augmented data.}
-Counterfactually-augmented data~\cite{kaushik2020counterfactual} and counterfactual
-invariance~\cite{veitch2021counterfactual} ask whether predictions should remain
-stable under label-preserving edits. CIC uses that idea at \emph{evaluation time} as
-a per-example certificate rather than as a training objective.
-
-\paragraph{CLIP typographic attacks.}
-CLIP and related VLMs are vulnerable to typographic / text-overlay
-cues~\cite{radford2021clip,goh2021multimodal}. We use this phenomenon as a
-controlled, finite-candidate shortcut benchmark on real pretrained
+CIC does not claim to invent shortcut learning, spurious correlations, or
+counterfactual invariance; its contribution is an operational per-example reliability
+certificate, a two-axis plane, and a finite-candidate counterfactual intervention and
+repair framework. \emph{Shortcut learning} is a documented failure mode in which
+models exploit background, texture, source, or annotation artifacts that correlate
+with labels and fail under shift~\cite{geirhos2020shortcut}; benchmarks such as
+Colored MNIST, Waterbirds, and CelebA separate a stable label feature from a
+correlated nuisance, and overparameterization can worsen
+reliance~\cite{sagawa2020investigation}. \emph{Robust-optimization} methods --- Group
+DRO~\cite{sagawa2020groupdro} and IRM~\cite{arjovsky2019irm} --- target invariance
+\emph{during training} and typically need group labels or multiple environments;
+CIC is instead a diagnostic counterfactual-stability signal for a fixed pretrained
+model and requires no retraining. \emph{Counterfactual invariance} and
+counterfactually-augmented data~\cite{kaushik2020counterfactual,veitch2021counterfactual}
+ask whether predictions stay stable under label-preserving edits; CIC uses that idea
+at \emph{evaluation time} as a per-example certificate rather than a training
+objective. CLIP and related VLMs are vulnerable to typographic / text-overlay
+cues~\cite{radford2021clip,goh2021multimodal}, which we use as a controlled
+finite-candidate shortcut benchmark on real pretrained
 OpenCLIP~\cite{ilharco2021openclip,schuhmann2022laion5b}.
 
-\paragraph{Typographic-attack defenses and disentangling written vs.\ visual concepts.}
-Closest to the repair setting are defenses that try to separate written text from
-visual concepts in CLIP. Materzy\'nska, Torralba, and Bau study whether CLIP's image
-encoder entangles written words with natural-image concepts and propose
-representation-space procedures for isolating or suppressing spelling-related
-directions~\cite{materzynska2022disentangling}. CIC differs in objective and
-operating mode: it does not train or learn a global text-removal subspace, and it
-does not modify the model. Instead, CIC performs per-example, finite-candidate audit
-and repair by ranking candidate regions according to counterfactual effect. This
-distinction matters because our embedding-additivity validation finds that
-typographic shortcut shifts are object-entangled rather than a single global additive
-bias direction; the method therefore targets the per-input region whose
-neutralization most improves stability.
-
-\paragraph{Selective prediction and robustness baselines.}
-Selective classification / abstention~\cite{geifman2017selective} defers on risky
-examples; confidence and out-of-distribution baselines~\cite{hendrycks2017baseline}
-detect many failures, especially low-confidence ones. CIC does not claim to dominate
-these everywhere; its intended advantage is on \emph{high-confidence} shortcut
-failures, and we report regimes where confidence wins. Causal representation
-learning~\cite{scholkopf2021causal} provides the broader motivation for treating
-label-defining structure as causal.
+\paragraph{What CIC does differently.}
+Closest to the repair setting are typographic-attack defenses that separate written
+text from visual concepts in CLIP, e.g.\ representation-space procedures for
+suppressing spelling-related directions~\cite{materzynska2022disentangling}. CIC
+differs in three ways: it does \textbf{not} train or learn a global text-removal
+direction, it does \textbf{not} modify the model, and it performs per-input,
+finite-candidate counterfactual repair by ranking candidate regions by counterfactual
+effect. This matters because our embedding-additivity validation finds typographic
+shortcut shifts are object-entangled rather than a single global additive bias, so the
+method targets the per-input region whose neutralization most improves stability.
+Finally, selective classification / abstention~\cite{geifman2017selective} and
+confidence/OOD baselines~\cite{hendrycks2017baseline} catch many failures, especially
+low-confidence ones; CIC does not claim to dominate these everywhere --- its intended
+advantage is on \emph{high-confidence} shortcut failures, and we report regimes where
+confidence wins. Causal representation learning~\cite{scholkopf2021causal} motivates
+treating label-defining structure as causal.
 
 % =====================================================================
 \section{Problem Setup}\label{sec:setup}
@@ -361,37 +381,17 @@ Adding CIC-guided abstention yields selective accuracy $0.929$ at coverage $0.98
 (2 abstentions, 35 repaired), i.e.\ near-perfect accuracy on covered examples.
 
 \subsection{Full benchmark-resampling audit}
-A single fixed benchmark cannot establish stability. We therefore ran a
-\emph{full benchmark-resampling audit}: three independently resampled held-out
-benchmark instances, each with a new object sequence, harmful class, decoy words,
-placements, image IDs, and \emph{distinct image-set and metadata hashes}, evaluated
-under frozen generation and repair policies. This addresses an earlier limitation in
-which only a fixed-benchmark determinism check was available.
-
-\begin{table}[t]
-\centering
-\caption{Full benchmark-resampling audit ($3$ resampled instances, distinct image/
-metadata hashes). Source:
-\texttt{results/hard\_multidecoy\_clip\_repair/full\_benchmark\_resampling\_*}.}
-\label{tab:resample}
-\small
-\begin{tabular}{lccc}
-\toprule
-Quantity & Mean & Min & Max \\
-\midrule
-Original misleading accuracy & 0.260 & 0.250 & 0.281 \\
-CIC top-1 repair & 0.750 & 0.719 & 0.813 \\
-Matched random text repair & 0.289 & 0.268 & 0.329 \\
-CIC $-$ random gap & 0.461 & 0.390 & 0.545 \\
-Clean-safe clean drop & 0.014 & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-All three seeds were benchmark-resampled with unique hashes, all had original
-accuracy $\le 0.40$, all had CIC beating random by $\ge 0.15$, and
-\texttt{full\_benchmark\_resampling\_stability\_supported = true}. The effect is
-stable across resampled benchmark instances, not an artifact of one fixed draw.
+A single fixed benchmark cannot establish stability, so we ran a \emph{full
+benchmark-resampling audit}: three independently resampled held-out instances, each
+with a new object sequence, harmful class, decoy words, placements, image IDs, and
+\emph{distinct image-set and metadata hashes}, under frozen generation and repair
+policies. Across the three seeds, original misleading accuracy stayed low (mean
+$0.260$, max $0.281$) and CIC top-1 repair held up (mean $0.750$, range
+$0.719$--$0.813$) against matched random text repair (mean $0.289$), for a CIC$-$random
+gap of mean $0.461$ (range $0.390$--$0.545$) at a clean drop of $\approx0.014$. All
+three had original accuracy $\le 0.40$, all beat random by $\ge 0.15$, and
+\texttt{full\_benchmark\_resampling\_stability\_supported = true}: the effect is stable
+across resampled instances, not an artifact of one fixed draw.
 
 \subsection{Scale and multi-model replication audit}
 As supporting evidence (this does \emph{not} replace the frozen primary headline,
@@ -403,7 +403,7 @@ four were \texttt{repair\_eligible}. All four models were evaluated on the
 \emph{same} larger resampled benchmark instance (one shared benchmark hash) for a
 fair cross-model comparison; that benchmark hash differs from the $n=32$ headline
 benchmark, so these values are a separate larger-$n$ replication rather than a
-cell-for-cell restatement of the headline. The test suite passes ($186$ tests).
+cell-for-cell restatement of the headline. The test suite passes ($382$ tests).
 
 \begin{table}[t]
 \centering
@@ -494,48 +494,99 @@ original failure-subset accuracy is $0$ --- this is \emph{not} a natural accurac
 does not establish general robustness or discovery. We restate this caveat wherever
 the number appears.
 
-\begin{table}[t]
-\centering
-\caption{Failure-conditioned repair on $50$ verified shortcut failures (original
-accuracy $=0$ by construction). Source:
-\texttt{results/hard\_multidecoy\_failure\_conditioned/}.}
-\label{tab:failcond}
-\small
-\begin{tabular}{lcc}
-\toprule
-Method & Repaired accuracy & 95\% CI \\
-\midrule
-Original (by construction) & 0.000 & [0.000, 0.071] \\
-Oracle harmful-text repair (upper bound) & 1.000 & [0.929, 1.000] \\
-\textbf{CIC top-1 repair} & \textbf{0.960} & [0.865, 0.989] \\
-\textbf{CIC top-3 repair} & \textbf{0.980} & [0.893, 0.996] \\
-CIC clean-safe repair & 0.940 & [0.838, 0.979] \\
-Highest-textness repair & 0.820 & [0.692, 0.902] \\
-Largest-text repair & 0.260 & [0.159, 0.396] \\
-Matched random text-region repair & 0.112 & $\pm$0.015 \\
-Random augmentation consensus & 0.020 & [0.004, 0.105] \\
-Random non-text patch repair & 0.002 & [0.001, 0.007] \\
-\bottomrule
-\end{tabular}
-\end{table}
+On these $50$ failures, CIC repairs $96$--$98\%$ (top-1 $0.960$, top-3 $0.980$,
+clean-safe $0.940$), approaching the oracle upper bound ($1.000$), versus
+$\approx 11.2\%\pm1.5\%$ for matched random text repair (gap $0.868$, non-overlapping
+CIs); generic controls remain low (highest-textness $0.820$, largest-text $0.260$,
+random augmentation consensus $0.020$, random non-text patch $0.002$), and clean and
+aligned preservation after clean-safe repair are both $1.000$. Coarse localization is
+$0.82$ (top-1) / $0.90$ (top-3) at IoU $\ge 0.3$ but only $0.04$ at IoU $\ge 0.5$;
+repair is near-certain when coarse localization succeeds (IoU $\ge 0.3$: top-1 $=1.0$)
+and \emph{still often succeeds} when it does not (IoU $<0.3$, $n=9$: top-1 $=0.78$). We
+therefore claim \emph{coarse causal-region intervention}, not exact box localization.
 
-CIC repairs $96$--$98\%$ of verified failures versus $\approx 11.2\% \pm 1.5\%$ for
-matched random text repair (gap $0.868$, non-overlapping CIs); clean and aligned
-preservation after clean-safe repair are both $1.000$. Localization is $0.82$ (top-1)
-and $0.90$ (top-3) at coarse IoU $\ge 0.3$ but only $0.04$ at IoU $\ge 0.5$. The
-repair-vs-localization crosstab shows repair is near-certain when coarse
-localization succeeds (IoU $\ge 0.3$: CIC top-1 $=1.0$) and \emph{still often
-succeeds} when it does not (IoU $<0.3$, $n=9$: CIC top-1 $=0.78$). We therefore claim
-\emph{coarse causal-region intervention}, not exact box localization.
+\subsection{Spatial-resolution and causal-intervention audit}\label{sec:spatial}
+Spatial precision remains a limitation, but the relevant intervention metric is not
+exact box recovery alone. In a pooled spatial-resolution audit over $210$ shortcut
+examples from the hard multi-decoy, failure-conditioned, and semantic-decoy
+benchmarks, CIC-selected regions had median IoU $0.39$ with the oracle shortcut box
+and reached IoU $\ge 0.5$ in $43\%$ of cases. However, they intersected the shortcut
+in $90\%$ of cases and covered at least half of the shortcut box in $77\%$ of cases.
+Selected regions were coarse, with median area $21\%$ of the image and about
+$2.1\times$ the oracle shortcut box area. Repair accuracy rose sharply with coarse
+overlap: CIC top-1 repair was $0.92$ for $0.3 \le \text{IoU} < 0.5$ and $1.00$ for
+IoU $\ge 0.5$, while remaining low below IoU $0.3$. Thus CIC should be understood as a
+coarse causal-intervention method rather than an exact localization or segmentation
+method. The audit reads existing artifacts only and changes no headline metric; a
+non-oracle refinement diagnostic (geometric variants re-scored using only pixels,
+candidate boxes, and model probabilities) did \emph{not} improve median IoU or the
+IoU $\ge 0.5$ rate, reported honestly as such. Repair accuracy rises sharply across
+exact-IoU buckets (top-1 repair $0.264$ at IoU $<0.1$, $0.919$ at $0.3\le$IoU$<0.5$,
+$1.000$ at IoU $\ge0.5$). Source:
+\texttt{results/spatial\_resolution\_audit/}.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.82\linewidth]{figures/failure_conditioned.pdf}
-\caption{Failure-conditioned repair. CIC variants ($0.94$--$0.98$) approach the
-oracle upper bound ($1.00$); all random and generic controls remain low, with
-matched random text repair at $0.112$.}
-\label{fig:failcond}
-\end{figure}
+\subsection{COCO-Text natural-image validation}\label{sec:cocotext}
+The controlled benchmarks above use generated stimuli. To test CIC on real
+photographs with dataset-provided annotations, we evaluated it on COCO-Text, where
+many natural images contain incidental scene text that can act as a shortcut. We
+used the same shortcut-agnostic, proposal-based CIC region method (no pre-specified
+shortcut family), scoring open region proposals on real pretrained OpenCLIP
+\texttt{ViT-B-32}~/~\texttt{laion2b\_s34b\_b79k} (fake backend blocked) over all
+$500$ COCO-Text metadata rows. From these we isolated $57$ directionally verified
+text-driven failures and a stricter subset of $39$ oracle-repairable failures.
+
+\emph{On COCO-Text, CIC provides dataset-backed directional repair evidence rather
+than localization support.} On the strict oracle-repairable subset, proposal-based
+CIC improves alias-aware repair from $0.205$ (matched random) to $0.538$ (gap
+$+0.333$), raises the target-probability improvement rate to $0.69$ (vs.\ $0.49$),
+decreases the text-distractor probability in $0.95$ of cases, and recovers the correct
+label in oracle top-3/top-5 of $0.90$/$1.00$; the directional subset shows the same
+pattern ($0.439$ vs.\ $0.175$, gap $+0.263$). Over all $500$ rows the gap is $-0.040$,
+as expected since most examples are already correct and need no repair, and reading OCR
+text into the candidate set helps only marginally
+(\texttt{ocr\_inclusion\_materially\_helps = false}). Crucially, selected proposals
+overlap annotated COCO-Text boxes in only $0.128$ of strict cases, so the strict and
+directional support gates remain \texttt{false} (overlap $0.128$/$0.140 < 0.60$ gate).
+A localization diagnostic attributes this to ranking, not coverage: text-overlapping
+proposals exist in over half of strict cases but are ranked below more causally
+effective non-text regions (ranking accounts for ${\sim}92\%$ of the shortfall), and
+\emph{forcing} the best text-overlapping proposal repairs \emph{worse} than the
+selected CIC region. Thus COCO-Text supports CIC as a causal repair signal on natural
+images while exposing a boundary: repair does not imply text-box localization. This is
+\textbf{not} open-world shortcut discovery and does \textbf{not} claim CIC localizes
+scene text. Per-subset and diagnostic metrics:
+\texttt{results/coco\_text\_cic\_full/} and the artifact index.
+
+\subsection{Predictive CIC abstention gate}\label{sec:predgate}
+The results above ask whether CIC repair \emph{works}; deployment also needs to know
+\emph{when to trust an individual repair before the true label is available}. We add a
+\textbf{label-free predictive abstention layer}: from inference-time observables only
+(repaired confidence/margin, top-$k$ repair agreement, entropy drop, stability gain,
+prediction-changed flag --- no true label, correctness, oracle outcome, or box), a
+logistic gate decides \textbf{accept} or \textbf{abstain}. Calibrated over $2{,}635$
+examples from $8$ benchmarks (repair-success base rate $0.785$), under
+leave-one-benchmark-out it reaches \textbf{AUROC $0.789$}, and under abstention the
+accepted repairs are high-precision (top-$25\%$ accepted precision $0.97$; top-$10\%$
+$0.99$). The best interpretable rule is simply \emph{accept iff CIC did not change the
+prediction}. The gate is strongest in pooled/controlled settings and \textbf{does not
+transfer reliably to the hardest COCO-Text subsets} (held-out AUROC $0.347$ strict /
+$0.296$ directional; controlled$\to$natural $\approx0.50$), so
+\texttt{predictive\_gate\_supported = true} while \texttt{is\_universal\_theorem =
+false}. Source: \texttt{results/predictive\_cic\_gate/}.
+
+This gate is the calibrated, observable instance of the \textbf{predictive CIC
+certificate} (Proposition~\ref{prop:predcert}, Section~\ref{sec:predcert};
+machine-checked in
+\texttt{causal\_reliability/theory/predictive\_certificate.py}): if the repaired
+prediction margin exceeds an \emph{empirically calibrated residual-instability bound}
+$\hat\epsilon$ ($m_{\mathrm{rep}}(x) > 2\hat\epsilon$), the repaired prediction is
+stable under the calibrated perturbation class, giving a \textbf{label-free
+accept/abstain rule}. It substitutes a calibrated bound for the residual budget
+$\epsilon_B$ of the per-input class-balance recovery lemma
+(Section~\ref{sec:theory}) and reads the margin off the observed repaired logits, so
+it requires \textbf{no true labels at inference time}. This is a
+\emph{conditional predictive certificate} and an abstention layer, not a universal
+correctness oracle.
 
 % =====================================================================
 \section{Theory and Mechanism}\label{sec:theory}
@@ -731,6 +782,173 @@ region that covers the shortcut while leaving the object intact yields small
 $\epsilon_C$. This is why repair succeeds at coarse IoU $\ge 0.3$ while exact IoU
 $\ge 0.5$ stays weak. The account is conditional and finite-candidate only.
 
+\subsection{Shortcut-type-agnostic generalization and a no-free-lunch boundary}
+\label{sec:global}
+The recovery results above are stated for a shortcut region/value but generalize to
+\emph{arbitrary} shortcut types under one structural assumption on the candidate set,
+\emph{without} strengthening the claim. The full development is in
+\texttt{docs/global\_cic\_theory\_attempt.md} with a machine-checked encoding in
+\texttt{causal\_reliability/theory/}; we summarize it here. Index the interventions by
+candidate $a$ in a proposal family $\mathcal{A}(x)$, with residual-to-clean
+$\rho^a_y(x)=\ell_y(T_a(x))-\ell_y(x_{\mathrm{clean}})$.
+
+\begin{definition}[Proposal completeness]
+$\mathcal{A}(x)$ is $(\epsilon_C,\epsilon_S,\epsilon_B)$-complete for shortcut $s$ if
+some $a^\star\in\mathcal{A}(x)$ preserves the causal content up to damage $\epsilon_C$,
+neutralizes the shortcut up to residual $\epsilon_S$, introduces no larger new
+shortcut, and leaves a class-balanced residual
+$\max_y|\rho^{a^\star}_y(x)-\bar\rho^{a^\star}(x)|\le\epsilon_B$ (with
+$\epsilon_B\le\epsilon_C+\epsilon_S+\epsilon_\xi$). Such an $a^\star$ is a
+\emph{good intervention}.
+\end{definition}
+
+\begin{theorem}[Proposal-complete CIC repair]
+If $\mathcal{A}(x)$ is complete for $s$, $m_{\mathrm{clean}}(x)>2\epsilon_B$, CIC
+scoring ranks a good intervention above all harmful candidates by margin $\gamma$, and
+scoring noise is below $\gamma/2$, then top-1 CIC selects a good intervention and the
+repaired prediction equals the clean causal prediction $y^\star$. The conclusion is
+\textbf{independent of whether the shortcut is text, icon, watermark, background, or
+texture}, as long as the family contains a good intervention.
+\end{theorem}
+\begin{proof}[Proof sketch]
+A selection lemma (noise $<\gamma/2$ cannot overturn a $\gamma$-margin ranking, so the
+empirical top-1 is good) composed with the per-input residual-to-clean recovery
+corollary applied to the selected intervention.
+\end{proof}
+A top-$k$ consensus corollary holds when the aggregated intervention keeps the residual
+class-balanced (averaging does not inherit single-member class-balance for free). Since
+$\epsilon_B$ and $m_{\mathrm{clean}}$ are not observable at deployment, an
+observable-margin lemma certifies recovery from the \emph{repaired} margin
+($m(T_a(x))>2\epsilon_B \Rightarrow$ repaired argmax $=$ clean argmax), and a
+\emph{validation-calibrated} gate over observables (score gap, repaired margin,
+stability gain, selected area, clean-safe score) upper-bounds $\epsilon_B\le\hat\epsilon$
+so repair is certified when the gate holds and $m(T_a(x))>2\hat\epsilon$; the
+gate$\Rightarrow\hat\epsilon$ step is an explicit empirical calibration, not a
+closed-form bound.
+
+\begin{theorem}[No assumption-free universal repair]
+For any finite-query black-box repair algorithm there exist two worlds that produce
+identical observations on every queried intervention but have different unobservable
+causal labels $y^\star$; the algorithm's single action repairs in one world and fails in
+the other. Hence no finite-query black-box counterfactual method can \emph{guarantee}
+discovery or repair of an arbitrary shortcut without proposal completeness or equivalent
+structural access to a good intervention.
+\end{theorem}
+This shows the finite-candidate restriction is a \emph{necessary} condition for any
+counterfactual shortcut method, not a weakness of CIC specifically: it is exactly the
+failure of proposal completeness made concrete. The weak/flat watermark channel
+(Section~\ref{sec:negative}) is a measured instance of this regime. We therefore frame
+the positive guarantee as \textbf{shortcut-type-agnostic under proposal completeness and
+a class-balanced residual condition} and the negative result as a \textbf{no-free-lunch
+impossibility for assumption-free shortcut discovery}: CIC is a general theorem over
+intervention families, not over arbitrary unobserved shortcuts --- a principled boundary
+between open-world discovery and finite-candidate repair, not universal discovery and not
+universal repair.
+
+\subsection{Complete finite-candidate characterization of CIC repair}
+\label{sec:finitechar}
+The results above are \emph{sufficient} conditions. We now close the finite-candidate
+setting with a \textbf{complete characterization}: an exact criterion, a \emph{tight}
+margin certificate, a coverage ceiling, and a repair--localization conflict. This is a
+characterization \emph{inside a finite candidate set} --- \textbf{not} open-world
+discovery, semantic correctness, exact localization, or general robustness. Index
+interventions by candidate $a\in\mathcal{A}(x)$ with repaired logits $z_a=f(T_a(x))$,
+clean logits $z_{\mathrm{clean}}$, residual $r_a=z_a-z_{\mathrm{clean}}$, and causal
+label $y^\star$ (used for evaluation only). Full proofs:
+\texttt{docs/theory.md}~\S11; machine-checked in
+\texttt{causal\_reliability/theory/finite\_candidate\_characterization.py}
+(\texttt{tests/test\_finite\_candidate\_characterization.py}).
+
+\begin{theorem}[Exact repair criterion]
+Candidate $a$ repairs iff $z_a(y^\star) > \max_{j\neq y^\star} z_a(j)$; equivalently,
+with $z_a=z_{\mathrm{clean}}+r_a$, iff $z_{\mathrm{clean}}(y^\star)-z_{\mathrm{clean}}(j)
+> r_a(j)-r_a(y^\star)$ for every $j\neq y^\star$. This is necessary and sufficient.
+\end{theorem}
+
+\begin{theorem}[Tight residual-margin certificate]
+Let $m_{\mathrm{clean}}=z_{\mathrm{clean}}(y^\star)-\max_{j\neq y^\star}z_{\mathrm{clean}}(j)$
+and bound the residual imbalance by $\max_y|r_a(y)-\bar r_a|\le\epsilon$. \emph{(Sufficiency)}
+If $m_{\mathrm{clean}}>2\epsilon$ then $a$ repairs. \emph{(Tightness)} If
+$m_{\mathrm{clean}}\le 2\epsilon$, the residual $r_a(y^\star)=-\epsilon$, $r_a(j)=+\epsilon$
+on the leading competitor (imbalance exactly $\epsilon$) flips the top class. The
+threshold $2\epsilon$ is therefore sharp.
+\end{theorem}
+
+\begin{theorem}[Proposal coverage ceiling]
+Define $R_\tau(x)=\mathbf{1}[\exists\,a\in\mathcal{A}(x):\mathrm{overlap}(a)\ge\tau]$.
+For \emph{any} scoring/ranking method choosing one candidate per input, localization
+success at threshold $\tau$ obeys
+$\mathbb{E}[\mathbf{1}[\mathrm{overlap}(\mathrm{selected})\ge\tau]]\le\mathbb{E}[R_\tau(x)]$,
+with equality for the oracle highest-overlap scorer.
+\end{theorem}
+
+\begin{theorem}[Repair--localization conflict]
+There exist finite-candidate repair problems where the repair-optimal proposal is not
+the localization-optimal proposal: e.g.\ a text-overlapping proposal with high human-box
+overlap but weak repair effect coexists with a non-text region of low text overlap but
+stronger repair effect. Hence repair success does not imply text-box localization.
+\end{theorem}
+\begin{proof}[Proof sketches]
+Theorem~1 is the definition of repair (strict argmax $=y^\star$) rearranged through
+$z_a=z_{\mathrm{clean}}+r_a$. Theorem~2 bounds the worst-case pairwise swing
+$r_a(j)-r_a(y^\star)\le 2\epsilon$ and exhibits a mean-zero witness attaining it.
+Theorem~3 is the pointwise inequality $\mathbf{1}[\mathrm{overlap}(\mathrm{selected})\ge\tau]
+\le R_\tau(x)$ under expectation. Theorem~4 is an explicit two-candidate construction.
+Full details in \texttt{docs/theory.md}~\S11.
+\end{proof}
+
+\paragraph{This explains COCO-Text.} The characterization makes the natural-image
+limitation (Section~\ref{sec:cocotext}) \emph{theoretically expected}. On the strict
+oracle-repairable subset, CIC beats matched random repair by $+0.333$ (Theorems~1--2:
+the selected intervention restores the causal margin), yet selected proposals overlap
+annotated text boxes in only $0.128$ of cases. The localization diagnostic shows
+text-overlapping proposals \emph{exist} ($0.564$ of strict cases) but are ranked below
+more causally effective regions (ranking $\approx 92\%$ of the shortfall, coverage
+ceilings the rest --- Theorem~3), and \emph{forcing} the best text-overlap proposal
+repairs \emph{worse} ($0.163$ vs.\ selected $0.439$ --- Theorem~4). The natural-image
+localization gap is thus a predicted consequence of the finite-candidate
+characterization, not merely an implementation failure; COCO-Text is reported as
+\textbf{directional repair evidence}, not localization support.
+
+\subsection{Predictive CIC abstention certificate}
+\label{sec:predcert}
+The positive theorems above are stated in unobservable quantities (the clean causal
+margin $m_{\mathrm{clean}}$ and residual budget $\epsilon_B$). For deployment we want
+a \emph{label-free} rule that decides, after CIC has already selected a repair from its
+finite proposal set, whether to trust that repair. We record a conditional certificate
+in purely observable, inference-time quantities; it is the formal object that the
+predictive gate of Section~\ref{sec:predgate} operationalizes. The machine-checkable
+encoding is \texttt{causal\_reliability/theory/predictive\_certificate.py} (tested in
+\texttt{tests/test\_predictive\_cic\_gate.py}).
+
+For the repaired input $T_a(x)$ selected by CIC, let $\hat y=\argmax_y f_y(T_a(x))$ and
+define the \textbf{repaired margin}
+$m_{\mathrm{rep}}(x) = f_{\hat y}(T_a(x)) - \max_{y\neq\hat y} f_y(T_a(x))$. Assume every
+perturbation in a calibrated perturbation class $\mathcal{A}_{\mathrm{cal}}$ changes any
+single class score by at most $\hat\epsilon$, where $\hat\epsilon$ is an
+\emph{empirically calibrated} upper bound (a margin quantile over validation
+residual-to-clean class imbalances) substituted for the unobservable budget $\epsilon_B$.
+
+\begin{proposition}[Margin-based predictive repair certificate]\label{prop:predcert}
+If $m_{\mathrm{rep}}(x) > 2\hat\epsilon$, then the repaired prediction $\hat y$ is
+invariant to all residual perturbations in $\mathcal{A}_{\mathrm{cal}}$.
+\end{proposition}
+\emph{Proof sketch.} A perturbation lowers the top score and raises a competitor by at
+most $\hat\epsilon$ each, so the margin shrinks by at most $2\hat\epsilon$; if it started
+above $2\hat\epsilon$ it stays positive and the argmax is unchanged, else the rule
+abstains (full proof in \texttt{docs/theory.md}).
+
+\paragraph{Interpretation.} The certificate is deliberately narrow: it does \textbf{not}
+prove semantic correctness or that CIC found the true shortcut. It gives a
+\emph{label-free accept/abstain rule} for an already-proposed CIC repair --- accept when
+the repaired margin exceeds the calibrated instability bound, abstain otherwise --- and is
+the formal object the empirical gate of Section~\ref{sec:predgate} operationalizes (which
+generalizes the single margin test to a few observable features, reaching pooled LOBO
+AUROC $0.789$ but remaining weak on hard COCO-Text, hence \textbf{not} a universal
+correctness oracle). It thus occupies the middle ground between the positive conditional
+theorem (\emph{when} a complete proposal set repairs) and the impossibility theorem
+(\emph{why} completeness cannot be guaranteed for arbitrary unknown shortcuts).
+
 % =====================================================================
 \section{Negative Results and Boundary Conditions}\label{sec:negative}
 % =====================================================================
@@ -750,30 +968,8 @@ repair. The embedding-additivity validation explains this: the watermark shortcu
 channel is weak/flat (within-object cosine $0.923 \gg$ within-shortcut $0.757$,
 \texttt{watermark\_shortcut\_channel\_weak = true}), so there is little shortcut
 contribution to neutralize --- a transfer failure \emph{consistent with} the theory
-rather than a refutation.
-
-\begin{table}[t]
-\centering
-\caption{Negative and boundary results. Sources:
-\texttt{results/cross\_shortcut\_generalization/} and
-\texttt{results/embedding\_additivity/}.}
-\label{tab:negative}
-\small
-\begin{tabular}{lcc}
-\toprule
-Result & Value & Status \\
-\midrule
-Cross-shortcut natural misleading accuracy & 0.750 & shortcut weak \\
-Cross-shortcut failure inclusion rate & 0.010 (4/384) & too few failures \\
-Cross-shortcut frozen CIC top-1 (failure subset) & 0.500 & below threshold \\
-Cross-shortcut headline eligible & false & \textbf{no transfer} \\
-\midrule
-Global additivity supported (text) & false & object-entangled \\
-Global additivity supported (watermark) & false & weak channel \\
-Exact localization IoU $\ge 0.5$ (main) & 0.063 & coarse only \\
-\bottomrule
-\end{tabular}
-\end{table}
+rather than a refutation. (Sources:
+\texttt{results/cross\_shortcut\_generalization/}, \texttt{results/embedding\_additivity/}.)
 
 \paragraph{No exact localization; no general robustness.}
 Localization is strong at coarse IoU $\ge 0.3$ and weak at IoU $\ge 0.5$ across all
@@ -783,197 +979,196 @@ controlled and generated; we make no broad real-world robustness claim.
 % =====================================================================
 \section{Codebase and Reproducibility Audit}\label{sec:repro}
 % =====================================================================
-\paragraph{Repository structure.}
-The codebase separates concerns: experiment runners
-(\texttt{causal\_reliability/experiments/}), discovery and region scoring
-(\texttt{causal\_reliability/discovery/}), repair and abstention
-(\texttt{causal\_reliability/repair/}), validation
-(\texttt{causal\_reliability/validation/}), an audit API
-(\texttt{causal\_reliability/api/}, \texttt{causal\_reliability/audit/}), and real
-models (\texttt{causal\_reliability/real\_models/}). Experiments are config-driven
-(\texttt{configs/*.yaml}), and every run writes structured artifacts (CSV/JSON/MD
-plus plots) under \texttt{results/}. The final report and machine-readable key
-numbers are regenerated into \texttt{results/final\_report/}.
-
-\paragraph{Reproducibility controls.}
-The hard multi-decoy audit distinguishes a fixed-benchmark determinism check from
-true benchmark resampling. The full benchmark-resampling audit draws independent
-held-out instances and records distinct \texttt{image\_set\_hash} and
-\texttt{metadata\_hash} per seed; identical hashes would invalidate a stability
-claim. Caching/resume is artifact-based, and timing profiles are recorded.
-
-\paragraph{Leakage prevention.}
-The non-oracle scorer is structurally denied the true label, harmful bbox, shortcut
-type, and correctness; these are used only to define failure subsets, oracle bounds,
-and localization metrics. A fallback/fake backend is blocked from headline
-eligibility, and headline flags (\texttt{headline\_eligible}) are gated on pretrained
-loading, leakage checks, low original accuracy, beating matched random, and clean
-preservation.
-
-\paragraph{Artifact-derived reporting and tests.}
-The paper's numbers are taken from regenerated artifacts (chiefly
-\texttt{final\_key\_numbers.json}), not from earlier exploratory runs. The test suite
-passes \textbf{174/174} (\texttt{python3 -m pytest}), and includes tests for
-no-oracle-leakage, cross-shortcut generalization gating, embedding-additivity/theory
-gating, per-input class-balance, and final-report caveats. The repository's
-$24/24$ negative controls pass.
-
-\paragraph{Stale-number fix.}
-An earlier exploratory headline (a $0.219 \to 0.875$ / $28.8\%$ figure) was produced
-under a previous prediction path and is \emph{not} used here. The
-\texttt{FINAL\_ARTIFACT\_INDEX.md} ``Final Headline Result'' block now reports the
-authoritative current numbers and confines the earlier figure to a clearly marked
-``Historical stale exploratory result --- not current headline'' subsection. The
-authoritative current artifacts (\texttt{final\_key\_numbers.json}) report
-$0.250 \to 0.750$ with matched random $0.331$, and this paper uses those. See
-Appendix~\ref{app:stale} for the discrepancy note.
+\paragraph{Controls, leakage prevention, and tests.}
+Experiments are config-driven and every run writes structured artifacts under
+\texttt{results/}; the full repository/file inventory is in
+\texttt{FINAL\_ARTIFACT\_INDEX.md}. Reproducibility is enforced by separating a
+fixed-benchmark determinism check from true resampling (the resampling audit records
+distinct \texttt{image\_set\_hash}/\texttt{metadata\_hash} per seed; identical hashes
+would invalidate a stability claim). The non-oracle scorer is structurally denied the
+true label, harmful bbox, shortcut type, and correctness --- these are used only to
+define failure subsets, oracle bounds, and localization metrics --- and a fallback/fake
+backend is blocked from headline eligibility (\texttt{headline\_eligible} is gated on
+pretrained loading, leakage checks, low original accuracy, beating matched random, and
+clean preservation). Paper numbers come from regenerated artifacts (chiefly
+\texttt{final\_key\_numbers.json}); the test suite passes \textbf{382/382}
+(\texttt{python3 -m pytest}) with tests for no-oracle-leakage, generalization/theory
+gating, class-balance, and final-report caveats, and $24/24$ negative controls pass. An
+earlier exploratory headline ($0.219\to0.875$) under a prior prediction path is
+\emph{not} used; the authoritative artifacts report $0.250\to0.750$ vs.\ matched random
+$0.331$, and the artifact index marks the stale value as historical.
 
 \paragraph{Human label-preservation validation.}
-Three annotators evaluated $100$ original/repaired image pairs ($300$ total
-annotations). Majority vote found that the object label was preserved in $96$ of $100$
-pairs and that the repaired image remained recognizable in $97$ of $100$ pairs.
-Inter-annotator agreement was high: Fleiss' $\kappa$ was $0.973$ for before-label
-judgments, $0.974$ for after-label judgments, $0.920$ for whether the label changed,
-and $1.000$ for after-image recognizability (percent agreement $0.980$, $0.980$,
-$0.993$, and $1.000$ respectively). The four preservation failures were retained and
-flagged rather than removed
-(\texttt{results/human\_label\_preservation/human\_validation\_flags.csv}): one apparent
-shape change (square$\rightarrow$circle, still recognizable), one blurry/unrecognizable
-repair, one corrupted/glitched repair, and one blank/missing-shape repair. The analysis
-pipeline (\texttt{validation/human\_label\_preservation/analyze\_annotations.py})
-computes these majority-vote rates, percent agreement, and Fleiss' kappa for the
-before-label, after-label, label-change, and recognizability fields directly from the
-raw per-annotator responses. Before/after label accuracy against the true label is
-reported only when pair-level true labels (\texttt{metadata\_hidden.csv}) are present,
-and is otherwise left as n/a; no true labels were fabricated.
+Three annotators evaluated $100$ original/repaired image pairs ($300$ annotations).
+Majority vote found the object label preserved in $96/100$ pairs and the repaired image
+recognizable in $97/100$, with high inter-annotator agreement (Fleiss' $\kappa$
+$0.973$/$0.974$/$0.920$/$1.000$ for before-label, after-label, label-change, and
+recognizability). The four preservation failures were retained and flagged rather than
+removed, and before/after accuracy against the true label is reported only when
+pair-level labels are present (otherwise n/a; no labels were fabricated). The study
+covers text-overlay repair pairs; broader validation across families remains future
+work.
 
-\paragraph{WILDS Waterbirds metadata-only diagnostic.}
-WILDS Waterbirds was also parsed as a real spurious-background diagnostic. A
-metadata-only OpenCLIP evaluation showed the expected background sensitivity: overall
-accuracy was $56.0\%$, with land-background accuracy $73.1\%$ versus water-background
-accuracy $35.9\%$, and landbird accuracy dropping from $74.4\%$ on land backgrounds to
-$21.6\%$ on water backgrounds. However, WILDS Waterbirds does not ship
-oracle-repairable bird/background masks or bounding boxes, so CIC repair and
-failure-conditioned oracle repair were not run. This diagnostic motivates a future
-regenerated CUB+Places Waterbirds-style benchmark with known masks, but it is
-\emph{not} a positive CIC repair result and is not part of the main results.
-
-\paragraph{Honest limitations of the codebase.}
-The full benchmark-resampling audit used a reduced number of random-baseline repeats
-per seed to bound runtime (each seed $\approx 9$ minutes), so per-seed random-baseline
-CIs are wider than the main run's $100$-seed estimate. The failure-conditioned and
-cross-shortcut evaluations are small-$n$ by construction. The human label-preservation
-study (three annotators, $100$ pairs) was performed on text-overlay repair pairs;
-broader validation across other shortcut families and real-world datasets remains
-future work.
+\paragraph{WILDS Waterbirds diagnostic and honest limitations.}
+WILDS Waterbirds was parsed as a real spurious-background diagnostic: metadata-only
+OpenCLIP showed the expected background sensitivity (overall $56.0\%$; land $73.1\%$
+vs.\ water $35.9\%$; landbird $74.4\%$ on land vs.\ $21.6\%$ on water), but it ships no
+oracle-repairable masks, so CIC repair was not run --- it is motivation/future work, not
+a positive result. The resampling audit used fewer random-baseline repeats per seed to
+bound runtime (wider per-seed CIs than the $100$-seed main run), and the
+failure-conditioned and cross-shortcut evaluations are small-$n$ by construction.
 
 % =====================================================================
 \section{Limitations}\label{sec:limits}
 % =====================================================================
-\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+\begin{itemize}[leftmargin=1.4em,itemsep=1pt]
 \item \textbf{Finite candidate class only.} CIC tests the intervention family it is
 given; it is \textbf{not} open-world shortcut discovery.
-\item \textbf{No exact localization.} Coarse causal-region localization (IoU
-$\ge 0.3$) only; IoU $\ge 0.5$ is weak.
-\item \textbf{No general robustness.} Results are on controlled, generated
-benchmarks with one pretrained CLIP model.
-\item \textbf{No cross-shortcut transfer.} The text-region policy did not transfer to
-the watermark shortcut.
-\item \textbf{Failure-conditioned conditioning.} The $96$--$98\%$ repair is on a
-subset where CLIP already fails (original accuracy $0$ by construction); it is not a
-natural accuracy.
-\item \textbf{Theory caveat.} Global input-independent additivity failed; the theory
-is supported only via the weaker per-input class-balance premise.
-\item \textbf{Human validation.} Human label-preservation validation was performed on
-$100$ text-overlay repair pairs with three annotators (majority-vote object label
-preserved in $96/100$, repaired image recognizable in $97/100$; Fleiss' $\kappa$ up to
-$1.000$); broader validation across other shortcut families and real-world datasets
-remains future work.
-\item \textbf{Real spurious-background diagnostic only.} WILDS Waterbirds was parsed as
-a real spurious-background diagnostic and OpenCLIP showed the expected background
-sensitivity (overall $56.0\%$; land $73.1\%$ vs.\ water $35.9\%$; landbird $74.4\%$ on
-land vs.\ $21.6\%$ on water). However, WILDS Waterbirds does not ship oracle-repairable
-masks/bboxes, so CIC repair was not run on it. A regenerated CUB+Places
-Waterbirds-style pilot with known masks was implemented but remained gated on missing
-external assets in the current run. Therefore Waterbirds is motivation/future work, not
-a positive CIC repair result.
+\item \textbf{No exact localization.} Coarse causal-region localization (IoU $\ge0.3$)
+only; IoU $\ge0.5$ is weak (pooled median IoU $0.39$). CIC is a coarse
+causal-intervention method, not segmentation.
+\item \textbf{Not a text detector.} The most causally effective intervention need not
+be the literal annotated text box: on COCO-Text, repair improves
+($0.205\to0.538$) without text-box localization (overlap $0.128$, ranking-dominated),
+so this is directional repair evidence, not scene-text detection.
+\item \textbf{No general robustness / no cross-shortcut transfer.} Results are on
+controlled, generated benchmarks (plus COCO-Text); the text-region policy did not
+transfer to the watermark shortcut.
+\item \textbf{Failure-conditioned conditioning.} The $96$--$98\%$ repair is on a subset
+where CLIP already fails (original accuracy $0$ by construction), not a natural accuracy.
+\item \textbf{Predictive gate is an abstention layer, not an oracle.} Controlled$\to$
+natural transfer is weak on hard COCO-Text (held-out AUROC $0.347$ strict / $0.296$
+directional).
+\item \textbf{Theory caveat.} Global input-independent additivity failed; the theory is
+supported only via the weaker per-input class-balance premise.
+\item \textbf{Human validation / Waterbirds scope.} Human validation covers $100$
+text-overlay pairs with three annotators; WILDS Waterbirds is a metadata-only
+spurious-background diagnostic (no oracle masks, so no CIC repair). Both are scoped
+honestly as future work beyond their current setting.
 \end{itemize}
+
+% =====================================================================
+\section{Frozen generalization map}\label{sec:frozenmap}
+% =====================================================================
+The final study is intentionally framed as a finite-candidate reliability framework.
+The table separates supported claims from explicit non-claims so that controlled
+repair, natural-image directional evidence, localization limits, predictive
+abstention, and theory are not conflated.
+
+CIC is \emph{frozen} as a finite-candidate counterfactual intervention framework:
+the method tests a hypothesized or proposed family of label-preserving interventions,
+not arbitrary unobserved shortcuts. Different experiments test different pieces of the
+same claim rather than one monolithic benchmark. Controlled benchmarks
+(Sections~\ref{sec:results}) establish finite-candidate shortcut \emph{repair}, with
+scale/multi-model audits showing it replicates across OpenCLIP backbones. The
+non-text semantic-decoy icon benchmark validates a \emph{second} shortcut family,
+so the effect is not text-specific. COCO-Text provides dataset-backed
+\emph{directional} repair evidence on natural photographs but \emph{not} localization
+support: the strict/directional support gates do not pass, and the localization
+diagnostic attributes the shortfall to ranking rather than proposal coverage. The
+predictive CIC gate (Section~\ref{sec:predgate}) adds a label-free
+\emph{abstention} signal that is strongest in pooled/controlled settings and weak on
+the hardest COCO-Text subsets. The theorems define the boundary from both sides: the
+global conditional theorem states the positive assumptions (proposal completeness,
+residual balance) under which repair is shortcut-type-agnostic, while the
+no-free-lunch impossibility theorem shows those assumptions are necessary. The
+predictive abstention certificate gives the margin-based accept/abstain rule under a
+calibrated residual-instability bound. None of these pieces, individually or together,
+claims solved open-world discovery, universal/general robustness, pixel-exact
+localization, scene-text detection, a passed COCO-Text support gate, an
+all-natural-image predictive guarantee, or a guarantee that the method self-certifies
+correctness on every input.
+
+\begin{table}[t]
+\centering
+\caption{Frozen generalization map (condensed). Each row is one evidence axis of the
+frozen finite-candidate CIC framework, with its main result and an explicit separation
+of what it supports from what it does \emph{not}. Headline metrics are unchanged; this
+table only aggregates existing results. Per-source details and the remaining
+evidence rows (semantic-decoy, spatial audit, human validation, COCO-Text localization
+diagnostic) are in \texttt{FINAL\_ARTIFACT\_INDEX.md}.}
+\label{tab:frozenmap}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{p{2.6cm}p{4.1cm}p{3.0cm}p{3.0cm}}
+\toprule
+Evidence axis & Main quantitative result & Supports & Does \emph{not} support \\
+\midrule
+Controlled text-overlay repair &
+$0.250\to0.750$ CIC top-1 vs.\ $0.331$ random ($n{=}32$, \texttt{headline\_eligible});
+resampling + failure-conditioned audits &
+Finite-candidate shortcut repair on real OpenCLIP &
+Natural-image generality by itself \\
+\midrule
+Scale / second-family validation &
+4/4 OpenCLIP backbones \texttt{repair\_eligible} (gaps $0.437$--$0.778$, $n{=}128$);
+non-text semantic-decoy icon passes 8/8 gates ($0.297\to0.711$) &
+Replication across scale/checkpoints and a second non-text family &
+All architectures or all shortcut types \\
+\midrule
+COCO-Text natural-image boundary &
+Strict subset CIC $0.538$ vs.\ random $0.205$ (gap $+0.333$); text overlap $0.128$,
+ranking-dominated &
+Dataset-backed directional repair on photographs &
+Text-box localization; a passed COCO-Text support gate \\
+\midrule
+Predictive abstention &
+$2{,}635$ examples; LOBO AUROC $0.789$; top-25\% accepted precision $0.97$ &
+Label-free abstention in pooled/controlled settings &
+Reliable hard COCO-Text strict/directional prediction \\
+\midrule
+Theory / impossibility boundary &
+Proposal-complete repair under $m_{\text{clean}}>2\varepsilon_B$; impossibility for
+assumption-free discovery; margin certificate $m_{\text{rep}}>2\hat\varepsilon$ &
+Shortcut-type-agnostic repair \emph{under} completeness; necessity of the assumptions &
+Assumption-free open-world discovery; semantic-correctness guarantee \\
+\midrule
+Finite-candidate characterization &
+Exact repair criterion, tight residual-margin certificate ($2\epsilon$ sharp),
+proposal-coverage ceiling, repair--localization conflict (Thms.~1--4, machine-checked) &
+Complete characterization in the finite-candidate setting &
+Assumption-free open-world discovery; a semantic-correctness guarantee \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % =====================================================================
 \section{Conclusion}\label{sec:conclusion}
 % =====================================================================
-Confidence measures how sure a model is; it cannot distinguish uncertainty from
-shortcut dependence. Counterfactual stability provides a second axis. On real
-pretrained OpenCLIP, finite-candidate text-region CIC repair beats matched controls
-across the hard held-out benchmark ($0.25\to0.75$ vs.\ $0.33$ random), a full
-benchmark-resampling audit (gap $0.39$--$0.54$), and a failure-conditioned evaluation
-($96$--$98\%$ vs.\ $11.2\%$). The mechanism is explained not by a global additive
-shortcut direction --- which fails because the typographic effect is
+CIC separates two questions confidence conflates: \emph{how sure is the model?} and
+\emph{is that certainty stable under shortcut interventions?} Confidence answers only
+the first; counterfactual stability supplies the second axis. On real pretrained
+OpenCLIP, finite-candidate CIC repair of text-overlay shortcuts is validated four
+ways: the frozen $n=32$ headline ($0.250\to0.750$ vs.\ $0.331$ matched random), a
+full benchmark-resampling audit, a failure-conditioned evaluation, and a scale audit
+at $n=128$ that replicates across all four real pretrained OpenCLIP
+backbone/checkpoint pairs (gaps $0.437$--$0.778$). The method is not text-specific: a
+second, non-text shortcut family --- semantic-decoy icons with no written words ---
+passes all gates at $n=64$ and $n=128$ ($0.297$ misleading $\to 0.711$ CIC top-1
+vs.\ $0.258$ random). A pooled spatial audit clarifies what the method is: a coarse
+causal-intervention tool whose selected regions cover the shortcut and drive repair,
+\emph{not} exact localization (median IoU $0.39$). The mechanism is explained not by a
+global additive shortcut direction --- which fails because the typographic effect is
 object-entangled --- but by the weaker per-input class-balance condition the recovery
-theorem actually requires, which is supported. The boundary is equally clear: the
-frozen policy does not transfer to a weak-channel watermark shortcut. The result is a
-finite-candidate audit-and-repair framework, not general shortcut discovery.
+theorem actually requires, which is supported. The negative boundaries are equally
+clear: the frozen policy does not transfer to a weak-channel watermark shortcut,
+WILDS Waterbirds is a real spurious-background diagnostic only, and we claim no
+open-world discovery or general robustness. CIC is a finite-candidate counterfactual
+intervention framework --- a second reliability axis --- not general shortcut
+discovery.
 
 % =====================================================================
-\appendix
-\section{Appendix: Stale-Number Discrepancy Note}\label{app:stale}
+% Appendices removed for the STS 20-page content limit (appendices count
+% toward the limit). Full per-experiment artifacts, extended tables
+% (artifact-to-number map, reproducibility checklist, and the detailed
+% COCO-Text per-subset and localization-diagnostic tables), and
+% reproducibility files are indexed in the accompanying artifact index
+% (FINAL_ARTIFACT_INDEX.md). Headline metrics and support gates are unchanged.
 % =====================================================================
-An earlier exploratory headline reported $0.219\to0.875$ with matched random $0.288$
-under a prior prediction path. That value is not used in this paper. The
-authoritative current artifact,
-\texttt{results/final\_report/final\_key\_numbers.json}, reports original misleading
-accuracy $0.250$, CIC top-1 repair $0.750$, and matched random repair $0.331$
-(\texttt{hard\_multidecoy\_headline\_primary\_metric = "misleading accuracy 0.250 to
-0.750"}). The artifact index (\texttt{FINAL\_ARTIFACT\_INDEX.md}) has been updated to
-mark the earlier value as stale historical context rather than as the final result,
-so the repository is now internally consistent on this number.
-
-\section{Appendix: Artifact-to-Number Map}\label{app:map}
-\small
-\begin{tabular}{p{0.40\linewidth}p{0.54\linewidth}}
-\toprule
-Number(s) used & Source artifact \\
-\midrule
-Hard multi-decoy main table & \texttt{results/final\_report/final\_key\_numbers.json} \\
-Full resampling audit (3 seeds) & \texttt{.../hard\_multidecoy\_clip\_repair/full\_benchmark\_resampling\_aggregate.csv} and \texttt{\_audit.csv} \\
-Scale + multi-model audit ($n{=}128$, 4 models) & \texttt{.../hard\_multidecoy\_scale\_model\_audit/scale\_model\_metrics.csv}, \texttt{scale\_model\_key\_numbers.json}, \texttt{scale\_model\_summary.md}, \texttt{scale\_model\_plot.png}, \texttt{model\_availability.csv} \\
-Second shortcut family (semantic-decoy icon, $n{=}64$ \& $n{=}128$) & \texttt{.../semantic\_decoy\_pilot/semantic\_decoy\_pilot\_gates.json}, \texttt{.../semantic\_decoy\_scale\_n128/semantic\_decoy\_pilot\_gates.json}; \texttt{final\_key\_numbers.json} (\texttt{semantic\_decoy\_*}) \\
-Failure-conditioned table & \texttt{.../hard\_multidecoy\_failure\_conditioned/failure\_conditioned\_metrics.csv}, \texttt{\_key\_numbers.json} \\
-Cross-shortcut negative result & \texttt{.../cross\_shortcut\_generalization/cross\_shortcut\_summary.md}, \texttt{final\_key\_numbers.json} \\
-Global additivity & \texttt{.../embedding\_additivity/embedding\_additivity\_key\_numbers.json} \\
-Per-input class-balance & \texttt{.../per\_input\_class\_balance/per\_input\_class\_balance\_key\_numbers.json} \\
-Confident-wrong / confidence-solvable AUROCs & \texttt{results/final\_report/final\_key\_numbers.json} \\
-Dangerous quadrant count / rate & \texttt{final\_key\_numbers.json} (\texttt{dangerous\_quadrant\_*}) \\
-Tests / negative controls & \texttt{python3 -m pytest}; \texttt{final\_key\_numbers.json} (\texttt{negative\_controls\_*}) \\
-\bottomrule
-\end{tabular}
-
-\section{Appendix: Reproducibility Checklist}\label{app:checklist}
-\small
-\begin{tabular}{p{0.74\linewidth}c}
-\toprule
-Item & Status \\
-\midrule
-Real pretrained OpenCLIP loaded (no fake backend for headline) & yes \\
-Non-oracle scorer excludes label/bbox/type/correctness & yes \\
-Headline gated on \texttt{headline\_eligible} & yes \\
-Full benchmark resampling with distinct image/metadata hashes & yes (3 seeds) \\
-Scale + multi-model replication audit (supporting, $n{=}128$) & yes (4/4 loaded, all repair-eligible) \\
-\quad shared resampled benchmark instance across models; hash $\ne$ $n{=}32$ headline & yes \\
-Fixed-benchmark determinism check separated from resampling & yes \\
-Global-additivity theory claim gated on validation metric & yes (false) \\
-Per-input class-balance gate & yes (true for text) \\
-Cross-shortcut transfer reported honestly when failing & yes (not eligible) \\
-Second shortcut family (semantic-decoy icon; supporting, not headline) & yes ($n{=}64$ \& $n{=}128$ both 8/8 gates) \\
-\quad earlier flat visual-decoy pilot retained as boundary evidence & yes (1 gate fails) \\
-Test suite & 186/186 pass \\
-Negative controls & 24/24 pass \\
-Human label-preservation study (3 annotators, 100 pairs) & yes \\
-\quad majority-vote label preserved / recognizable & 96/100, 97/100 \\
-\quad Fleiss' $\kappa$ (before/after/change/recognizable) & 0.973 / 0.974 / 0.920 / 1.000 \\
-WILDS Waterbirds (metadata-only diagnostic; no CIC repair) & diagnostic \\
-\bottomrule
-\end{tabular}
+\noindent\emph{Full per-experiment artifacts, extended tables, and reproducibility
+files are indexed in the accompanying artifact index
+(\texttt{FINAL\_ARTIFACT\_INDEX.md}).}
 
 \bibliographystyle{plain}
 \bibliography{references}

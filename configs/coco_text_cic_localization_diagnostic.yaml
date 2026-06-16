@@ -1,0 +1,43 @@
+# COCO-Text proposal-localization diagnostic.
+#
+# Explains WHY the full COCO-Text CIC gates fail only on selected text-box
+# overlap: proposal-coverage failure (text-overlapping proposals not available)
+# vs scoring/ranking failure (they exist but CIC ranks object/background higher).
+#
+# Reads the frozen results/coco_text_cic_full proposal diagnostics (geometry +
+# ranking, model-free) and re-runs real CLIP only for the repair half on the
+# verified directional/strict subsets. Writes ONLY under
+# results/coco_text_cic_localization_diagnostic/. Never modifies any existing
+# gate, metric, or final-report file. open_world_claim_allowed stays False.
+
+seed: 0
+prefer_gpu: false
+results_dir: results
+output_subdir: coco_text_cic_localization_diagnostic
+
+# Frozen source artifacts (read-only).
+full_dir: results/coco_text_cic_full
+triage_dir: results/coco_text_cic_triage
+
+# Model-dependent repair budget.
+predict_batch_size: 64
+max_dilated_components: 12
+n_contact_examples: 6
+# Cap the number of union examples sent to CLIP (null = all directional/strict).
+max_model_examples: null
+
+data:
+  root: data/coco_text_cic
+  metadata_csv: data/coco_text_cic/metadata.csv
+  image_size: 224
+  split: test
+
+# Real pretrained OpenCLIP. A `fake` backend skips the model-dependent half and
+# produces only the model-free recall/ranking diagnosis.
+model:
+  preferred_backend: open_clip
+  model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+  allow_pretrained_download: false
+  device: auto

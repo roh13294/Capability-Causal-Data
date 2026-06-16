@@ -1,0 +1,53 @@
+best_global_operator: expanded_gray_fill_1.25
+content_preservation_documented: false
+data:
+  image_size: 224
+  metadata_csv: data/coco_text_cic/metadata.csv
+  root: data/coco_text_cic
+  split: test
+directional_min_cic_distractor_gap: 0.1
+directional_min_cic_prob_gap: 0.1
+directional_min_failures: 50
+directional_min_oracle_prob_improve: 0.8
+directional_min_text_overlap: 0.6
+eval_subsets:
+- all_500
+- directional_57
+- strict_39
+grid_scales:
+- 0.18
+- 0.3
+- 0.45
+high_confidence_threshold: 0.7
+max_candidates: 48
+max_content_drop: 0.15
+model:
+  allow_pretrained_download: false
+  device: auto
+  model_name: ViT-B-32
+  preferred_backend: open_clip
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+n_example_visualizations: 4
+ocr_material_help_delta: 0.05
+oracle_operators:
+- gray_fill
+- expanded_gray_fill_1.25
+- gaussian_blur
+- expanded_blur_1.25
+output_subdir: coco_text_cic_full
+predict_batch_size: 64
+prefer_gpu: false
+prob_improve_eps: 0.01
+results_dir: results
+seed: 0
+strict_min_cic_random_gap: 0.15
+strict_min_n: 30
+strict_min_oracle_recovery: 0.8
+strict_min_oracle_repair: 0.7
+strict_min_text_overlap: 0.6
+triage:
+  clean_csv: coco_text_clean_subset.csv
+  dir: results/coco_text_cic_triage
+  directional_csv: coco_text_verified_directional_failures.csv
+  strict_csv: coco_text_verified_oracle_repairable_failures.csv

@@ -1,0 +1,60 @@
+{
+  "diagnostic_only": true,
+  "experiment": "natural_text_intervention_sweep",
+  "backend": "open_clip",
+  "model_name": "ViT-B-32",
+  "real_pretrained_model_loaded": true,
+  "cv2_available": false,
+  "n_verified_failures": 29,
+  "n_operators": 13,
+  "n_unavailable_operators": 1,
+  "unavailable_operators": [
+    "telea_inpaint"
+  ],
+  "best_oracle_strict_operator": "expanded_gray_fill_1.25",
+  "best_oracle_strict_repair": 0.4482758620689655,
+  "best_cic_strict_operator": "expanded_gray_fill_1.25",
+  "best_cic_strict_repair": 0.27586206896551724,
+  "best_directional_operator": "gray_fill",
+  "best_directional_improve_rate": 1.0,
+  "best_cic_random_gap_operator": "black_fill",
+  "best_cic_random_gap": 0.13793103448275862,
+  "oracle_strict_exceeds_0.50": false,
+  "oracle_strict_exceeds_0.70": false,
+  "oracle_ceiling_supports_strict": false,
+  "cic_strict_candidate": false,
+  "cic_bottleneck": "residual natural-image ambiguity / label-set difficulty (oracle strict stays low even with a known text box, while directional improvement is high)",
+  "interpretation": "No operator lifts oracle strict repair above 0.50 even with the known text box, while directional improvement stays high: exact top-1 natural-image recovery is limited by residual natural-image ambiguity / label-set difficulty, not only by CIC.",
+  "global_operator": "gray_fill",
+  "global_operator_criterion": "oracle target-probability improvement rate (global, aggregate)",
+  "global_operator_cic_random_gap": 0.10344827586206898,
+  "global_operator_oracle_directional_rate": 1.0,
+  "strict_gate_could_pass_global": false,
+  "strict_gate_cic_random_gap_required": 0.15,
+  "open_world_claim_allowed": false,
+  "natural_text_supported_unchanged": false,
+  "headline": "natural-text intervention/operator sweep (diagnostic) \u2014 final metrics unchanged",
+  "baseline_reference": {
+    "n_verified_text_driven_failures": 29,
+    "oracle_text_box_repair_accuracy": 0.3103448275862069,
+    "oracle_text_box_repair_or_improve_rate": 0.9655172413793104,
+    "cic_top1_repair_accuracy": 0.2413793103448276,
+    "matched_random_proposal_repair_accuracy": 0.13793103448275862,
+    "selected_overlaps_text_box_rate": 0.7241379310344828,
+    "natural_text_supported": false,
+    "open_world_claim_allowed": false
+  },
+  "preferred_wording": [
+    "shortcut-agnostic proposal-based CIC",
+    "open-candidate intervention search",
+    "natural-image validation",
+    "does not require a pre-specified shortcut family, but still depends on candidate region proposals"
+  ],
+  "forbidden_wording": [
+    "fully open-world shortcut discovery",
+    "solves shortcut discovery",
+    "general robustness",
+    "universal repair",
+    "deployment-ready"
+  ]
+}

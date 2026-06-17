@@ -14,3 +14,16 @@ __pycache__/
 
 data/coco_text_cic/raw/
 results/demo_validation/exports/
+models/sam/*.pth
+models/sam/
+results/auto_proposal_pilot/cache/
+results/csa_lora_pilot/cache/
+results/csa_lora_pilot/figures/
+
+# Waterbirds CSA manual-LoRA pilot: never commit checkpoints, datasets, image
+# caches, or WILDS downloaded data.
+wilds/
+results/csa_lora_pilot/waterbirds/cache/
+results/csa_lora_pilot/waterbirds/*.pt
+results/csa_lora_pilot/waterbirds/*.pth
+results/csa_lora_pilot/waterbirds/checkpoints/

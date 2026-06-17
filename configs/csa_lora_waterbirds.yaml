@@ -1,0 +1,92 @@
+# Pre-registered Waterbirds CSA manual-LoRA pilot.
+#
+# Bounded question: does CSA, applied as a small manual-LoRA adaptation of a real
+# OpenCLIP visual tower, improve WORST-GROUP robustness on real WILDS Waterbirds
+# WITHOUT using group labels for CSA training? One bounded experiment; positive,
+# null, or negative results are all acceptable.
+#
+# Scope: NOT universal robustness, NOT open-world shortcut discovery, NOT an
+# RLHF/DPO replacement, NOT deployment validation, and NOT a replacement for the
+# finalized STS report. Outputs go ONLY to results/csa_lora_pilot/waterbirds/.
+# Group labels are used ONLY for evaluation and the optional Group DRO baseline.
+# No checkpoints, datasets, or caches are committed.
+
+seed: 0
+
+model:
+  backend: open_clip                 # open_clip | transformers | auto
+  model_name: ViT-B-32
+  pretrained_tag: laion2b_s34b_b79k
+  transformers_model_name: openai/clip-vit-base-patch32
+  device: auto                       # auto -> cuda > mps > cpu
+  allow_download: false              # cache/local only by default
+  logit_scale: 100.0
+
+data:
+  wilds_root: data/wilds             # local WILDS release dir (waterbirds_v*/)
+  wilds_dataset: waterbirds
+  image_size: 224
+  max_train_examples: 256            # bounded subset for a Colab/T4 pilot
+  max_eval_examples: 256
+  eval_splits: [val, test]           # evaluate on whichever are present
+  primary_eval_split: test           # split used for go/no-go
+  landbird_prompt: "a photo of a landbird"
+  waterbird_prompt: "a photo of a waterbird"
+  download: false                    # never download unless --download is passed
+
+# Finite, label-free diagnostic interventions (NOT verified causal masks).
+interventions:
+  n_candidates: 4
+  types: [region_mask, region_blur, lowfreq_bg, weak_crop]
+  mask_frac: 0.35
+  blur_kernel: 9
+  lowfreq_scale: 0.15
+  lowfreq_grid: 8
+  crop_min: 0.85
+  seed: 12345
+
+# manual_lora_visual: ACTUAL LoRA on the OpenCLIP visual tower (internal
+# LoRALinear, NO PEFT). Only LoRA factors train; backbone + text head are frozen.
+manual_lora:
+  rank: 4
+  alpha: 8.0
+  dropout: 0.0
+  target_last_blocks: 2              # patch the final N visual transformer blocks
+  target_modules: [c_fc, c_proj, out_proj]
+  lr: 0.0002
+  epochs: 2
+  batch_size: 16
+  encode_batch_size: 32
+  train_text: false                  # text tower frozen
+
+csa:
+  lambda_stability: 1.0              # KL(clean || intervened) stability term
+  lambda_cic: 1.0                    # CIC counterfactual-instability penalty
+  lambda_preserve: 0.5               # anchor to frozen zero-shot clean prediction
+  preservation_mode: kl              # kl | mse
+
+# Fallback ONLY: lightweight adapter/head over FROZEN embeddings (NOT LoRA).
+fallback:
+  bottleneck: 32
+  alpha: 1.0
+  lr: 0.01
+  epochs: 3
+  batch_size: 32
+
+# Optional Group DRO baseline (group-label-SUPERVISED; off by default).
+group_dro:
+  enabled: false
+  lr: 0.0002
+  eta: 0.01
+
+cache_dir: results/csa_lora_pilot/waterbirds/cache
+use_embedding_cache: true
+force_cpu_lora: false                # only set true for an explicit CPU smoke run
+enable_cf_aug: false                 # optional counterfactual-augmentation baseline
+
+# Pre-registered go / no-go thresholds.
+go_no_go:
+  max_avg_acc_drop: 0.03             # CSA avg acc must not drop > 0.03 vs plain
+  min_worst_group_gain: 0.05         # CSA worst-group must beat plain by >= +0.05
+  min_instability_drop_rel: 0.20     # CSA CIC instability >= 20% below plain
+  strong_worst_group_gain: 0.08      # multi-seed strong threshold (mean paired gain)

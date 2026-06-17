@@ -1,0 +1,247 @@
+{
+  "pilot": "coco_text_auto_proposal",
+  "status": "ok",
+  "backend": "open_clip",
+  "model_name": "ViT-B-32",
+  "pretrained_loaded": true,
+  "generators_available": {
+    "grid_boxes": true,
+    "edge_component_boxes": true,
+    "saliency_boxes": true,
+    "sam_boxes": false,
+    "dino_boxes": false
+  },
+  "generators_skipped": {
+    "sam_boxes": "SAM/SAM2 not installed (no `segment_anything` or `sam2` module); skipping cleanly",
+    "dino_boxes": "GroundingDINO/DINO not installed (no `groundingdino` module); skipping cleanly"
+  },
+  "families_evaluated": [
+    "existing_cic_baseline",
+    "grid_boxes",
+    "edge_component_boxes",
+    "saliency_boxes"
+  ],
+  "max_examples": 50,
+  "max_candidates_per_family": 14,
+  "subsets": {
+    "strict": {
+      "n": 39,
+      "original_alias_accuracy": 0.0,
+      "families": {
+        "existing_cic_baseline": {
+          "n": 39,
+          "cic_repair_alias_accuracy": 0.41025641025641024,
+          "matched_random_repair_alias_accuracy": 0.23076923076923078,
+          "cic_random_gap": 0.17948717948717946,
+          "cic_target_prob_improvement_rate": 0.717948717948718,
+          "random_target_prob_improvement_rate": 0.48717948717948717,
+          "cic_text_distractor_decrease_rate": 0.7948717948717948,
+          "selected_text_overlap_rate": 0.1794871794871795,
+          "selected_object_overlap_rate": 0.38461538461538464,
+          "coverage_ceiling_iou01": 0.28205128205128205,
+          "coverage_ceiling_iou03": 0.10256410256410256,
+          "median_rank_best_text_overlap": 1.0,
+          "repair_localization_conflict_rate": 0.3333333333333333,
+          "mean_selected_area_fraction": 0.0580765960230246,
+          "mean_candidates": 13.0
+        },
+        "grid_boxes": {
+          "n": 39,
+          "cic_repair_alias_accuracy": 0.358974358974359,
+          "matched_random_repair_alias_accuracy": 0.358974358974359,
+          "cic_random_gap": 0.0,
+          "cic_target_prob_improvement_rate": 0.6923076923076923,
+          "random_target_prob_improvement_rate": 0.6666666666666666,
+          "cic_text_distractor_decrease_rate": 0.8974358974358975,
+          "selected_text_overlap_rate": 0.15384615384615385,
+          "selected_object_overlap_rate": 0.02564102564102564,
+          "coverage_ceiling_iou01": 0.41025641025641024,
+          "coverage_ceiling_iou03": 0.1794871794871795,
+          "median_rank_best_text_overlap": 2.5,
+          "repair_localization_conflict_rate": 0.2564102564102564,
+          "mean_selected_area_fraction": 0.03188775510204083,
+          "mean_candidates": 14.0
+        },
+        "edge_component_boxes": {
+          "n": 39,
+          "cic_repair_alias_accuracy": 0.41025641025641024,
+          "matched_random_repair_alias_accuracy": 0.358974358974359,
+          "cic_random_gap": 0.051282051282051266,
+          "cic_target_prob_improvement_rate": 0.7435897435897436,
+          "random_target_prob_improvement_rate": 0.6666666666666666,
+          "cic_text_distractor_decrease_rate": 0.9230769230769231,
+          "selected_text_overlap_rate": 0.20512820512820512,
+          "selected_object_overlap_rate": 0.23076923076923078,
+          "coverage_ceiling_iou01": 0.6153846153846154,
+          "coverage_ceiling_iou03": 0.3333333333333333,
+          "median_rank_best_text_overlap": 3.5,
+          "repair_localization_conflict_rate": 0.3333333333333333,
+          "mean_selected_area_fraction": 0.03232876684327578,
+          "mean_candidates": 13.923076923076923
+        },
+        "saliency_boxes": {
+          "n": 39,
+          "cic_repair_alias_accuracy": 0.5128205128205128,
+          "matched_random_repair_alias_accuracy": 0.38461538461538464,
+          "cic_random_gap": 0.12820512820512814,
+          "cic_target_prob_improvement_rate": 0.7435897435897436,
+          "random_target_prob_improvement_rate": 0.7692307692307693,
+          "cic_text_distractor_decrease_rate": 0.8717948717948718,
+          "selected_text_overlap_rate": 0.20512820512820512,
+          "selected_object_overlap_rate": 0.23076923076923078,
+          "coverage_ceiling_iou01": 0.5641025641025641,
+          "coverage_ceiling_iou03": 0.3076923076923077,
+          "median_rank_best_text_overlap": 3.0,
+          "repair_localization_conflict_rate": 0.41025641025641024,
+          "mean_selected_area_fraction": 0.06168440934065933,
+          "mean_candidates": 9.820512820512821
+        }
+      },
+      "go_no_go": {
+        "promising": true,
+        "per_family": {
+          "grid_boxes": {
+            "repair_gain_vs_baseline": -0.051282051282051266,
+            "selected_text_overlap_gain_vs_baseline": -0.025641025641025633,
+            "coverage_ceiling_iou01_gain_vs_baseline": 0.1282051282051282,
+            "criterion_repair_+0.10": false,
+            "criterion_text_overlap_+0.15_no_big_repair_drop": false,
+            "criterion_coverage_+0.20": false,
+            "family_promising": false
+          },
+          "edge_component_boxes": {
+            "repair_gain_vs_baseline": 0.0,
+            "selected_text_overlap_gain_vs_baseline": 0.025641025641025633,
+            "coverage_ceiling_iou01_gain_vs_baseline": 0.33333333333333337,
+            "criterion_repair_+0.10": false,
+            "criterion_text_overlap_+0.15_no_big_repair_drop": false,
+            "criterion_coverage_+0.20": true,
+            "family_promising": true
+          },
+          "saliency_boxes": {
+            "repair_gain_vs_baseline": 0.10256410256410253,
+            "selected_text_overlap_gain_vs_baseline": 0.025641025641025633,
+            "coverage_ceiling_iou01_gain_vs_baseline": 0.28205128205128205,
+            "criterion_repair_+0.10": true,
+            "criterion_text_overlap_+0.15_no_big_repair_drop": false,
+            "criterion_coverage_+0.20": true,
+            "family_promising": true
+          }
+        }
+      }
+    },
+    "directional": {
+      "n": 50,
+      "original_alias_accuracy": 0.0,
+      "families": {
+        "existing_cic_baseline": {
+          "n": 50,
+          "cic_repair_alias_accuracy": 0.34,
+          "matched_random_repair_alias_accuracy": 0.18,
+          "cic_random_gap": 0.16000000000000003,
+          "cic_target_prob_improvement_rate": 0.68,
+          "random_target_prob_improvement_rate": 0.46,
+          "cic_text_distractor_decrease_rate": 0.78,
+          "selected_text_overlap_rate": 0.16,
+          "selected_object_overlap_rate": 0.3,
+          "coverage_ceiling_iou01": 0.3,
+          "coverage_ceiling_iou03": 0.08,
+          "median_rank_best_text_overlap": 1.0,
+          "repair_localization_conflict_rate": 0.3,
+          "mean_selected_area_fraction": 0.05847536670918368,
+          "mean_candidates": 12.98
+        },
+        "grid_boxes": {
+          "n": 50,
+          "cic_repair_alias_accuracy": 0.32,
+          "matched_random_repair_alias_accuracy": 0.26,
+          "cic_random_gap": 0.06,
+          "cic_target_prob_improvement_rate": 0.72,
+          "random_target_prob_improvement_rate": 0.64,
+          "cic_text_distractor_decrease_rate": 0.9,
+          "selected_text_overlap_rate": 0.12,
+          "selected_object_overlap_rate": 0.08,
+          "coverage_ceiling_iou01": 0.34,
+          "coverage_ceiling_iou03": 0.14,
+          "median_rank_best_text_overlap": 2.0,
+          "repair_localization_conflict_rate": 0.24,
+          "mean_selected_area_fraction": 0.03188775510204082,
+          "mean_candidates": 14.0
+        },
+        "edge_component_boxes": {
+          "n": 50,
+          "cic_repair_alias_accuracy": 0.38,
+          "matched_random_repair_alias_accuracy": 0.32,
+          "cic_random_gap": 0.06,
+          "cic_target_prob_improvement_rate": 0.76,
+          "random_target_prob_improvement_rate": 0.6,
+          "cic_text_distractor_decrease_rate": 0.92,
+          "selected_text_overlap_rate": 0.18,
+          "selected_object_overlap_rate": 0.18,
+          "coverage_ceiling_iou01": 0.64,
+          "coverage_ceiling_iou03": 0.34,
+          "median_rank_best_text_overlap": 3.5,
+          "repair_localization_conflict_rate": 0.32,
+          "mean_selected_area_fraction": 0.03786312181122449,
+          "mean_candidates": 13.94
+        },
+        "saliency_boxes": {
+          "n": 50,
+          "cic_repair_alias_accuracy": 0.42,
+          "matched_random_repair_alias_accuracy": 0.32,
+          "cic_random_gap": 0.09999999999999998,
+          "cic_target_prob_improvement_rate": 0.74,
+          "random_target_prob_improvement_rate": 0.66,
+          "cic_text_distractor_decrease_rate": 0.92,
+          "selected_text_overlap_rate": 0.2,
+          "selected_object_overlap_rate": 0.2,
+          "coverage_ceiling_iou01": 0.54,
+          "coverage_ceiling_iou03": 0.3,
+          "median_rank_best_text_overlap": 3.0,
+          "repair_localization_conflict_rate": 0.36,
+          "mean_selected_area_fraction": 0.054572305484693884,
+          "mean_candidates": 10.22
+        }
+      },
+      "go_no_go": {
+        "promising": true,
+        "per_family": {
+          "grid_boxes": {
+            "repair_gain_vs_baseline": -0.020000000000000018,
+            "selected_text_overlap_gain_vs_baseline": -0.04000000000000001,
+            "coverage_ceiling_iou01_gain_vs_baseline": 0.040000000000000036,
+            "criterion_repair_+0.10": false,
+            "criterion_text_overlap_+0.15_no_big_repair_drop": false,
+            "criterion_coverage_+0.20": false,
+            "family_promising": false
+          },
+          "edge_component_boxes": {
+            "repair_gain_vs_baseline": 0.03999999999999998,
+            "selected_text_overlap_gain_vs_baseline": 0.01999999999999999,
+            "coverage_ceiling_iou01_gain_vs_baseline": 0.34,
+            "criterion_repair_+0.10": false,
+            "criterion_text_overlap_+0.15_no_big_repair_drop": false,
+            "criterion_coverage_+0.20": true,
+            "family_promising": true
+          },
+          "saliency_boxes": {
+            "repair_gain_vs_baseline": 0.07999999999999996,
+            "selected_text_overlap_gain_vs_baseline": 0.04000000000000001,
+            "coverage_ceiling_iou01_gain_vs_baseline": 0.24000000000000005,
+            "criterion_repair_+0.10": false,
+            "criterion_text_overlap_+0.15_no_big_repair_drop": false,
+            "criterion_coverage_+0.20": true,
+            "family_promising": true
+          }
+        }
+      }
+    }
+  },
+  "pilot_promising": true,
+  "non_claims": [
+    "This is automated finite-candidate proposal generation, NOT open-world shortcut discovery.",
+    "This is NOT universal repair or general robustness.",
+    "This is NOT deployment validation or clinical validation.",
+    "This is NOT a replacement for the finalized STS report."
+  ]
+}

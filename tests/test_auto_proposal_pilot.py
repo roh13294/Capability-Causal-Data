@@ -198,7 +198,13 @@ def test_sam_cached_proposals_load_without_rerunning_sam(tmp_path):
         _img(12), enable_real_sam=True, checkpoint_path="models/sam/__bogus__.pth",
         cache_dir=str(tmp_path), image_id=99, use_cache=True,
     )
-    assert miss.available is False and "checkpoint not found" in miss.skip_reason.lower()
+    assert miss.available is False and miss.skip_reason
+    low = miss.skip_reason.lower()
+    # Accept either reason: SAM installed but checkpoint bogus, or SAM not installed.
+    assert (
+        "checkpoint not found" in low  # SAM installed, bogus checkpoint
+        or "segment_anything" in low or "not installed" in low  # SAM not installed
+    )
 
 
 def test_sam_checkpoint_is_gitignored():

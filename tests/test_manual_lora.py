@@ -159,6 +159,39 @@ def test_lora_linear_initial_identity():
     assert torch.allclose(lora.bias, base.bias, atol=1e-6)
 
 
+def test_lora_linear_factors_on_base_device():
+    # The LoRA factors must be created on the SAME device as the frozen base
+    # weight (CPU here), so the merged-weight property never mixes devices.
+    base = nn.Linear(10, 6)
+    lora = LoRALinear(base, rank=3, alpha=6.0)
+    assert lora.lora_A.device == base.weight.device
+    assert lora.lora_B.device == base.weight.device
+    assert lora.lora_delta.device == base.weight.device
+    assert lora.weight.device == base.weight.device
+    assert lora.lora_A.dtype == base.weight.dtype
+    assert lora.lora_B.dtype == base.weight.dtype
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
+def test_lora_linear_cuda_weight_and_delta_on_cuda():
+    # Regression: wrapping a CUDA nn.Linear must keep the LoRA factors, the
+    # merged ``weight`` property, and the ``lora_delta`` on CUDA. Previously the
+    # factors defaulted to CPU and ``weight = base.weight + lora_delta`` crashed
+    # with "Expected all tensors to be on the same device" on the OpenCLIP
+    # out_proj.weight attention path.
+    base = nn.Linear(12, 7).cuda()
+    assert base.weight.is_cuda
+    lora = LoRALinear(base, rank=4, alpha=8.0)
+    assert lora.lora_A.is_cuda
+    assert lora.lora_B.is_cuda
+    assert lora.lora_delta.is_cuda
+    assert lora.weight.is_cuda
+    # Still identity at init, now wholly on CUDA (B == 0 => weight == base.weight).
+    assert torch.allclose(lora.weight, base.weight, atol=1e-6)
+    x = torch.randn(5, 12, device="cuda")
+    assert torch.allclose(lora(x), base(x), atol=1e-5)
+
+
 def test_lora_linear_nonidentity_after_perturbation():
     base = nn.Linear(8, 8)
     lora = LoRALinear(base, rank=2, alpha=4.0)

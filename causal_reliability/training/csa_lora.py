@@ -1043,11 +1043,17 @@ class ManualLoraModel:
         self.model = visual_model
         self.device = device
         self.logit_scale = float(logit_scale)
-        self.text_features = text_features
-        self.transfer_text_features = transfer_text_features
+        # Keep the frozen text head and normalization constants on the same
+        # device as the visual encoder so the image/text matmul in
+        # ``image_logits`` and the normalization in ``_encode`` do not hit a
+        # CPU/CUDA device mismatch when ``device`` is a CUDA device.
+        self.text_features = text_features.to(device)
+        self.transfer_text_features = (
+            transfer_text_features.to(device) if transfer_text_features is not None else None
+        )
         self.encode_batch_size = int(max(1, encode_batch_size))
-        self._mean = torch.tensor(mean, dtype=torch.float32).reshape(1, 3, 1, 1)
-        self._std = torch.tensor(std, dtype=torch.float32).reshape(1, 3, 1, 1)
+        self._mean = torch.tensor(mean, dtype=torch.float32, device=device).reshape(1, 3, 1, 1)
+        self._std = torch.tensor(std, dtype=torch.float32, device=device).reshape(1, 3, 1, 1)
 
     def trainable_parameters(self):
         return [p for p in self.model.parameters() if p.requires_grad]
@@ -1128,6 +1134,10 @@ def build_real_lora_model(cfg: LoraPilotConfig) -> dict[str, Any]:
         dropout=mlc.dropout,
         max_layers=mlc.target_last_blocks,
     )
+    # The LoRA factors are created on the base weights' device, so the patched
+    # model is already on ``cfg.model.device``. Move it again defensively in case
+    # any sub-module was materialised on CPU during patching.
+    status.model.to(cfg.model.device)
 
     shape_prompts = [cfg.data.prompt_template.format(label=name) for name in SHAPE_CLASSES]
     text_features = encode_text_prompts(status, shape_prompts, cfg.model.device).detach().cpu()

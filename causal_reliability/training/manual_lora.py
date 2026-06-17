@@ -79,9 +79,17 @@ class LoRALinear(nn.Module):
         self.alpha = float(alpha)
         self.scaling = self.alpha / self.rank
 
+        # Create the low-rank factors on the SAME device/dtype as the frozen base
+        # weight. The base may already live on CUDA (OpenCLIP is loaded with
+        # ``device=...``); defaulting the factors to CPU would make the merged
+        # ``weight`` property add a CUDA tensor to a CPU tensor and crash with a
+        # device-mismatch error on the attention ``out_proj.weight`` path.
+        device = base.weight.device
+        dtype = base.weight.dtype
+
         # Trainable low-rank factors: A random, B zero -> initial delta is zero.
-        self.lora_A = nn.Parameter(torch.empty(self.rank, self.in_features))
-        self.lora_B = nn.Parameter(torch.zeros(self.out_features, self.rank))
+        self.lora_A = nn.Parameter(torch.empty(self.rank, self.in_features, device=device, dtype=dtype))
+        self.lora_B = nn.Parameter(torch.zeros(self.out_features, self.rank, device=device, dtype=dtype))
         self.reset_lora_parameters()
 
         self.lora_dropout = nn.Dropout(p=float(dropout)) if dropout and dropout > 0 else nn.Identity()
